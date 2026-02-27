@@ -140,7 +140,7 @@ const Sidebar = () => {
   return (
     <>
       {/* Mobile top bar */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-sidebar border-b border-sidebar-border flex items-center px-4 z-40">
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-card border-b border-border flex items-center px-4 z-40 shadow-sm">
         <button onClick={() => setMobileOpen(true)} className="p-1.5 text-foreground">
           <Menu className="w-5 h-5" />
         </button>

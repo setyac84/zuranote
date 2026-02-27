@@ -285,7 +285,7 @@ const TaskModal = ({ task, division, isOpen, onClose, onUpdate, onDelete, readOn
                 {/* Status */}
                 <div>
                   <label className={labelCls}>Status</label>
-                  {isEditable || !readOnly ? (
+                  {isEditable || true ? (
                     <ModalDropdown
                       value={(form.status as TaskStatus) || (displayTask.status as TaskStatus) || 'todo'}
                       onChange={(v) => {
@@ -335,47 +335,41 @@ const TaskModal = ({ task, division, isOpen, onClose, onUpdate, onDelete, readOn
                   <div className="border-t border-border pt-4">
                     <p className="text-xs font-medium text-muted-foreground mb-3">Creative Details</p>
                     <div className="space-y-3">
-                      {isEditable ? (
-                        <>
-                          <div>
-                            <label className={labelCls}>Content Asset</label>
-                            <input value={form.content_asset_link || ''} onChange={e => setForm(f => ({ ...f, content_asset_link: e.target.value }))} className={inputCls} placeholder="Link or description of asset..." />
-                          </div>
-                          <div>
-                            <label className={labelCls}>Moodboard</label>
-                            <input value={form.moodboard_link || ''} onChange={e => setForm(f => ({ ...f, moodboard_link: e.target.value }))} className={inputCls} placeholder="Link or moodboard description..." />
-                          </div>
-                          <div>
-                            <label className={labelCls}>Visual Direction</label>
-                            <input value={form.brand_guidelines || ''} onChange={e => setForm(f => ({ ...f, brand_guidelines: e.target.value }))} className={inputCls} placeholder="Modern, minimalist, bold colors..." />
-                          </div>
-                          <div>
-                            <label className={labelCls}>Deliverables</label>
-                            <input value={form.aspect_ratio || ''} onChange={e => setForm(f => ({ ...f, aspect_ratio: e.target.value }))} className={inputCls} placeholder="16:9, 1:1, A4 poster..." />
-                          </div>
-                          <div>
-                            <label className={labelCls}>Result Link</label>
-                            <input value={form.result_link || ''} onChange={e => setForm(f => ({ ...f, result_link: e.target.value }))} className={inputCls} placeholder="https://..." />
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          {displayTask.content_asset_link && (
-                            <p className="text-sm text-foreground">Content Asset: {displayTask.content_asset_link as string}</p>
-                          )}
-                          {displayTask.moodboard_link && (
-                            <p className="text-sm text-foreground">Moodboard: {displayTask.moodboard_link as string}</p>
-                          )}
-                          {displayTask.brand_guidelines && <p className="text-sm text-foreground">Visual Direction: {displayTask.brand_guidelines as string}</p>}
-                          {displayTask.aspect_ratio && <p className="text-sm text-foreground">Deliverables: {displayTask.aspect_ratio as string}</p>}
-                          {displayTask.result_link && (
-                            <div className="flex items-center gap-2 text-sm">
-                              <Link className="w-3.5 h-3.5 text-muted-foreground" />
-                              <a href={displayTask.result_link as string} target="_blank" rel="noreferrer" className="text-primary hover:underline truncate">Result Link</a>
-                            </div>
-                          )}
-                        </>
-                      )}
+                      <div>
+                        <label className={labelCls}>Content Asset</label>
+                        <input value={form.content_asset_link || ''} onChange={e => {
+                          setForm(f => ({ ...f, content_asset_link: e.target.value }));
+                          if (!isEditable && task) onUpdate({ ...task, ...form, content_asset_link: e.target.value });
+                        }} className={inputCls} placeholder="Link or description of asset..." />
+                      </div>
+                      <div>
+                        <label className={labelCls}>Moodboard</label>
+                        <input value={form.moodboard_link || ''} onChange={e => {
+                          setForm(f => ({ ...f, moodboard_link: e.target.value }));
+                          if (!isEditable && task) onUpdate({ ...task, ...form, moodboard_link: e.target.value });
+                        }} className={inputCls} placeholder="Link or moodboard description..." />
+                      </div>
+                      <div>
+                        <label className={labelCls}>Visual Direction</label>
+                        <input value={form.brand_guidelines || ''} onChange={e => {
+                          setForm(f => ({ ...f, brand_guidelines: e.target.value }));
+                          if (!isEditable && task) onUpdate({ ...task, ...form, brand_guidelines: e.target.value });
+                        }} className={inputCls} placeholder="Modern, minimalist, bold colors..." />
+                      </div>
+                      <div>
+                        <label className={labelCls}>Deliverables</label>
+                        <input value={form.aspect_ratio || ''} onChange={e => {
+                          setForm(f => ({ ...f, aspect_ratio: e.target.value }));
+                          if (!isEditable && task) onUpdate({ ...task, ...form, aspect_ratio: e.target.value });
+                        }} className={inputCls} placeholder="16:9, 1:1, A4 poster..." />
+                      </div>
+                      <div>
+                        <label className={labelCls}>Result Link</label>
+                        <input value={form.result_link || ''} onChange={e => {
+                          setForm(f => ({ ...f, result_link: e.target.value }));
+                          if (!isEditable && task) onUpdate({ ...task, ...form, result_link: e.target.value });
+                        }} className={inputCls} placeholder="https://..." />
+                      </div>
                     </div>
                   </div>
                 )}
