@@ -158,7 +158,7 @@ const Dashboard = () => {
   };
 
   const highPriorityTasks = myTasks
-    .filter(t => t.priority === 'urgent' || t.priority === 'high')
+    .filter(t => (t.priority === 'urgent' || t.priority === 'high') && t.status !== 'done')
     .sort((a, b) => {
       if (!a.due_date) return 1;
       if (!b.due_date) return -1;
