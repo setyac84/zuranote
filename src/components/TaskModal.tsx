@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useState, useEffect, useRef } from 'react';
 import { useProjects, useMembers, useCompanies, useCreateTask, useUpdateTask } from '@/hooks/useSupabaseData';
-import { X, Calendar, Flag, User, Link, AlertTriangle, Trash2, ChevronDown, Save, Pencil } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { X, Calendar, Flag, User, Link, AlertTriangle, Trash2, ChevronDown, Save, Pencil, Image } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/formatDate';
@@ -21,6 +21,15 @@ const statusOptions: { value: TaskStatus; label: string }[] = [
 const priorityOptions: { value: TaskPriority; label: string }[] = [
   { value: 'low', label: 'Low' }, { value: 'medium', label: 'Medium' }, { value: 'high', label: 'High' }, { value: 'urgent', label: 'Urgent' },
 ];
+
+// Custom labels for creative fields
+const creativeFieldLabels: Record<string, string> = {
+  content_asset_link: 'Content Asset',
+  moodboard_link: 'Reference',
+  brand_guidelines: 'Visual Direction',
+  aspect_ratio: 'Aspect Ratio',
+  result_link: 'Result Link',
+};
 
 const ModalDropdown = <T extends string>({ value, onChange, options, placeholder }: {
   value: T; onChange: (v: T) => void; options: { value: T; label: string }[]; placeholder?: string;
@@ -47,6 +56,109 @@ const ModalDropdown = <T extends string>({ value, onChange, options, placeholder
           </div>
         </>
       )}
+    </div>
+  );
+};
+
+// Rich textarea with image paste support
+const RichTextArea = ({ value, onChange, placeholder, className }: {
+  value: string; onChange: (v: string) => void; placeholder?: string; className?: string;
+}) => {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handlePaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+
+    for (const item of Array.from(items)) {
+      if (item.type.startsWith('image/')) {
+        e.preventDefault();
+        const file = item.getAsFile();
+        if (!file) continue;
+
+        setUploading(true);
+        try {
+          const ext = file.type.split('/')[1] || 'png';
+          const fileName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+          const filePath = `uploads/${fileName}`;
+
+          const { error } = await supabase.storage.from('task-images').upload(filePath, file);
+          if (error) throw error;
+
+          const { data: urlData } = supabase.storage.from('task-images').getPublicUrl(filePath);
+          const imageUrl = urlData.publicUrl;
+
+          // Insert image URL at cursor position
+          const textarea = textareaRef.current;
+          if (textarea) {
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const before = value.slice(0, start);
+            const after = value.slice(end);
+            const imageText = `${before ? '\n' : ''}[image: ${imageUrl}]\n`;
+            onChange(before + imageText + after);
+          } else {
+            onChange(value + `\n[image: ${imageUrl}]\n`);
+          }
+        } catch (err) {
+          console.error('Image upload failed:', err);
+        } finally {
+          setUploading(false);
+        }
+      }
+    }
+  };
+
+  // Auto-resize textarea
+  useEffect(() => {
+    const el = textareaRef.current;
+    if (el) {
+      el.style.height = 'auto';
+      el.style.height = Math.max(60, el.scrollHeight) + 'px';
+    }
+  }, [value]);
+
+  return (
+    <div className="relative">
+      <textarea
+        ref={textareaRef}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        onPaste={handlePaste}
+        placeholder={placeholder}
+        className={cn(className, 'min-h-[60px] resize-none')}
+      />
+      {uploading && (
+        <div className="absolute right-2 top-2 flex items-center gap-1 text-[10px] text-muted-foreground bg-secondary/80 px-2 py-0.5 rounded-full">
+          <Image className="w-3 h-3 animate-pulse" /> Uploading...
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Render rich text content (text + images)
+const RichTextDisplay = ({ value }: { value: string }) => {
+  if (!value || value === '-') return <p className="text-sm text-foreground">-</p>;
+
+  const parts = value.split(/(\[image: [^\]]+\])/g);
+  return (
+    <div className="space-y-2">
+      {parts.map((part, i) => {
+        const imageMatch = part.match(/^\[image: ([^\]]+)\]$/);
+        if (imageMatch) {
+          return (
+            <a key={i} href={imageMatch[1]} target="_blank" rel="noreferrer">
+              <img src={imageMatch[1]} alt="Pasted" className="max-w-full max-h-[200px] rounded-lg border border-border object-contain" />
+            </a>
+          );
+        }
+        if (!part.trim()) return null;
+        return (
+          <p key={i} className="text-sm text-foreground whitespace-pre-wrap break-words">{part}</p>
+        );
+      })}
     </div>
   );
 };
@@ -128,7 +240,6 @@ const TaskModal = ({ task, division, isOpen, onClose, onDelete, readOnly, mode: 
 
   const handleStatusChange = async (newStatus: TaskStatus) => {
     setForm((f: any) => ({ ...f, status: newStatus }));
-    // In view mode, save status immediately
     if (!isEditable && task) {
       await updateTask.mutateAsync({ id: task.id, status: newStatus });
     }
@@ -143,12 +254,23 @@ const TaskModal = ({ task, division, isOpen, onClose, onDelete, readOnly, mode: 
     if (task) setForm({ ...task });
   };
 
+  // Save a single field inline (for result_link in view mode)
+  const handleInlineFieldSave = async (field: string, value: string) => {
+    setForm((f: any) => ({ ...f, [field]: value }));
+    if (!isEditable && task) {
+      await updateTask.mutateAsync({ id: task.id, [field]: value });
+    }
+  };
+
   const projectOptions = divisionProjects.map(p => {
     const company = companies.find(c => c.id === p.company_id);
     return { value: p.id, label: company ? `${p.name} · ${company.name}` : p.name };
   });
   const assigneeOptions = divisionMembers.map(m => ({ value: m.id, label: m.name }));
   const assignee = allMembers.find(u => u.id === form.assignee_id);
+
+  // Creative fields (excluding result_link which is handled separately)
+  const creativeTextFields = ['content_asset_link', 'moodboard_link', 'brand_guidelines', 'aspect_ratio'];
 
   return (
     <AnimatePresence>
@@ -240,9 +362,9 @@ const TaskModal = ({ task, division, isOpen, onClose, onDelete, readOnly, mode: 
                 <div>
                   <label className={labelCls}>Description</label>
                   {isEditable ? (
-                    <textarea value={form.description || ''} onChange={e => setForm((f: any) => ({ ...f, description: e.target.value }))} className={cn(inputCls, 'min-h-[60px] resize-none')} placeholder="Task description..." />
+                    <RichTextArea value={form.description || ''} onChange={v => setForm((f: any) => ({ ...f, description: v }))} className={inputCls} placeholder="Task description..." />
                   ) : (
-                    <p className="text-sm text-foreground">{form.description || '-'}</p>
+                    <RichTextDisplay value={form.description || '-'} />
                   )}
                 </div>
 
@@ -251,16 +373,44 @@ const TaskModal = ({ task, division, isOpen, onClose, onDelete, readOnly, mode: 
                   <div className="border-t border-border pt-4">
                     <p className="text-xs font-medium text-muted-foreground mb-3">Creative Details</p>
                     <div className="space-y-3">
-                      {['content_asset_link', 'moodboard_link', 'brand_guidelines', 'aspect_ratio', 'result_link'].map(field => (
+                      {creativeTextFields.map(field => (
                         <div key={field}>
-                          <label className={labelCls}>{field.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</label>
+                          <label className={labelCls}>{creativeFieldLabels[field]}</label>
                           {isEditable ? (
-                            <input value={form[field] || ''} onChange={e => setForm((f: any) => ({ ...f, [field]: e.target.value }))} className={inputCls} placeholder="..." />
+                            <RichTextArea
+                              value={form[field] || ''}
+                              onChange={v => setForm((f: any) => ({ ...f, [field]: v }))}
+                              className={inputCls}
+                              placeholder="Type or paste image..."
+                            />
                           ) : (
-                            <p className="text-sm text-foreground break-all">{form[field] || '-'}</p>
+                            <RichTextDisplay value={form[field] || '-'} />
                           )}
                         </div>
                       ))}
+
+                      {/* Result Link - always editable inline */}
+                      <div>
+                        <label className={labelCls}>{creativeFieldLabels.result_link}</label>
+                        <div className="space-y-1.5">
+                          <input
+                            value={form.result_link || ''}
+                            onChange={e => setForm((f: any) => ({ ...f, result_link: e.target.value }))}
+                            onBlur={e => {
+                              if (!isEditable && task && e.target.value !== task.result_link) {
+                                handleInlineFieldSave('result_link', e.target.value);
+                              }
+                            }}
+                            className={inputCls}
+                            placeholder="Paste result link..."
+                          />
+                          {form.result_link && (
+                            <a href={form.result_link} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-xs text-primary hover:underline">
+                              <Link className="w-3 h-3" /> Open link
+                            </a>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}
