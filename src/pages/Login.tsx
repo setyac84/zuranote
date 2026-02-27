@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Briefcase, ArrowRight, Loader2, Eye, EyeOff } from 'lucide-react';
+import { ArrowRight, Loader2, Eye, EyeOff } from 'lucide-react';
+import logoImg from '@/assets/logo.png';
 
 const Login = () => {
   const { login, signup, user, loading: authLoading } = useAuth();
@@ -50,10 +51,8 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="w-full max-w-md">
         <div className="flex items-center gap-3 mb-8 justify-center">
-          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-            <Briefcase className="w-5 h-5 text-primary-foreground" />
-          </div>
-          <h1 className="text-2xl font-bold text-foreground">ProjectHub</h1>
+          <img src={logoImg} alt="Fix Note" className="w-10 h-10 rounded-xl" />
+          <h1 className="text-2xl font-bold text-foreground">Fix Note</h1>
         </div>
 
         <div className="glass-card rounded-2xl p-8">
