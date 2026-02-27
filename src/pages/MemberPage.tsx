@@ -64,15 +64,15 @@ const MemberPage = () => {
     <div className={cn('space-y-3', isInline ? 'border border-border rounded-lg p-4' : 'glass-card rounded-xl p-5 mb-4')}>
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="text-xs font-medium text-muted-foreground mb-1 block">Nama</label>
-          <input value={form.name || ''} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className={cn(inputCls, 'w-full')} placeholder="Nama lengkap" />
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">Name</label>
+          <input value={form.name || ''} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className={cn(inputCls, 'w-full')} placeholder="Full name" />
         </div>
         <div>
           <label className="text-xs font-medium text-muted-foreground mb-1 block">Email</label>
           <input value={form.email || ''} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} className={cn(inputCls, 'w-full')} placeholder="email@company.com" />
         </div>
         <div>
-          <label className="text-xs font-medium text-muted-foreground mb-1 block">Jabatan</label>
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">Position</label>
           <input value={form.position || ''} onChange={e => setForm(f => ({ ...f, position: e.target.value }))} className={cn(inputCls, 'w-full')} placeholder="e.g. UI/UX Designer" />
         </div>
         <div>
@@ -84,7 +84,7 @@ const MemberPage = () => {
           </select>
         </div>
         <div>
-          <label className="text-xs font-medium text-muted-foreground mb-1 block">Divisi</label>
+          <label className="text-xs font-medium text-muted-foreground mb-1 block">Division</label>
           <select value={form.division || activeDivision} onChange={e => setForm(f => ({ ...f, division: e.target.value as Division }))} className={cn(inputCls, 'w-full')}>
             <option value="creative">Creative</option>
             <option value="developer">Developer</option>
@@ -98,7 +98,7 @@ const MemberPage = () => {
         </button>
         <button onClick={() => { cancelEdit(); setShowAdd(false); setForm({}); }}
           className="px-4 py-2 text-sm rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors">
-          Batal
+          Cancel
         </button>
       </div>
     </div>
@@ -108,15 +108,15 @@ const MemberPage = () => {
     <div className="max-w-3xl">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Member</h1>
+          <h1 className="text-2xl font-bold text-foreground">Members</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {isSuperAdmin ? 'Semua member' : `Daftar member divisi ${activeDivision}`}
+            {isSuperAdmin ? 'All members' : `${activeDivision} division members`}
           </p>
         </div>
         {isAdmin && (
           <button onClick={() => { setShowAdd(true); setEditingId(null); setForm({ role: 'member', division: activeDivision }); }}
             className="flex items-center gap-1.5 px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
-            <Plus className="w-4 h-4" /> Tambah Member
+            <Plus className="w-4 h-4" /> Add Member
           </button>
         )}
       </motion.div>
@@ -163,8 +163,8 @@ const MemberPage = () => {
                     </button>
                     {deleteConfirm === member.id ? (
                       <div className="flex items-center gap-1">
-                        <button onClick={() => handleDelete(member.id)} className="px-2 py-1 text-[10px] rounded bg-destructive text-destructive-foreground">Hapus</button>
-                        <button onClick={() => setDeleteConfirm(null)} className="px-2 py-1 text-[10px] rounded bg-secondary text-secondary-foreground">Batal</button>
+                         <button onClick={() => handleDelete(member.id)} className="px-2 py-1 text-[10px] rounded bg-destructive text-destructive-foreground">Delete</button>
+                         <button onClick={() => setDeleteConfirm(null)} className="px-2 py-1 text-[10px] rounded bg-secondary text-secondary-foreground">Cancel</button>
                       </div>
                     ) : (
                       <button onClick={() => setDeleteConfirm(member.id)}

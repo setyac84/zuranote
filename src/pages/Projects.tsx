@@ -59,12 +59,12 @@ const Projects = () => {
         <div>
           <h1 className="text-2xl font-bold text-foreground">Projects</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {isSuperAdmin ? 'Semua project' : isAdmin ? `Semua project divisi ${activeDivision}` : 'Project yang melibatkan Anda'}
+            {isSuperAdmin ? 'All projects' : isAdmin ? `All ${activeDivision} division projects` : 'Projects you\'re involved in'}
           </p>
         </div>
         {isAdmin && (
           <button onClick={handleCreate} className="flex items-center gap-1.5 px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
-            <Plus className="w-4 h-4" /> Tambah Project
+            <Plus className="w-4 h-4" /> Add Project
           </button>
         )}
       </motion.div>
@@ -76,7 +76,7 @@ const Projects = () => {
       </div>
 
       {visibleProjects.length === 0 && (
-        <div className="text-center py-20 text-muted-foreground text-sm">Belum ada project di divisi ini.</div>
+        <div className="text-center py-20 text-muted-foreground text-sm">No projects in this division yet.</div>
       )}
 
       <ProjectModal project={selectedProject} division={activeDivision} isOpen={modalOpen} onClose={() => setModalOpen(false)}
