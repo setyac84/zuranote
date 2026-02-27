@@ -14,16 +14,243 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      companies: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar: string | null
+          company_id: string | null
+          created_at: string
+          division: Database["public"]["Enums"]["app_division"]
+          email: string
+          id: string
+          name: string
+          position: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar?: string | null
+          company_id?: string | null
+          created_at?: string
+          division?: Database["public"]["Enums"]["app_division"]
+          email: string
+          id: string
+          name: string
+          position?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar?: string | null
+          company_id?: string | null
+          created_at?: string
+          division?: Database["public"]["Enums"]["app_division"]
+          email?: string
+          id?: string
+          name?: string
+          position?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          company_id: string
+          created_at: string
+          description: string | null
+          division: Database["public"]["Enums"]["app_division"]
+          end_date: string | null
+          id: string
+          name: string
+          priority: Database["public"]["Enums"]["task_priority"]
+          start_date: string | null
+          status: Database["public"]["Enums"]["project_status"]
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          description?: string | null
+          division?: Database["public"]["Enums"]["app_division"]
+          end_date?: string | null
+          id?: string
+          name: string
+          priority?: Database["public"]["Enums"]["task_priority"]
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["project_status"]
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          description?: string | null
+          division?: Database["public"]["Enums"]["app_division"]
+          end_date?: string | null
+          id?: string
+          name?: string
+          priority?: Database["public"]["Enums"]["task_priority"]
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["project_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tasks: {
+        Row: {
+          aspect_ratio: string | null
+          assignee_id: string | null
+          brand_guidelines: string | null
+          bug_severity: string | null
+          content_asset_link: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          environment: string | null
+          id: string
+          moodboard_link: string | null
+          priority: Database["public"]["Enums"]["task_priority"]
+          project_id: string
+          repo_link: string | null
+          request_date: string | null
+          result_link: string | null
+          status: Database["public"]["Enums"]["task_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          aspect_ratio?: string | null
+          assignee_id?: string | null
+          brand_guidelines?: string | null
+          bug_severity?: string | null
+          content_asset_link?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          environment?: string | null
+          id?: string
+          moodboard_link?: string | null
+          priority?: Database["public"]["Enums"]["task_priority"]
+          project_id: string
+          repo_link?: string | null
+          request_date?: string | null
+          result_link?: string | null
+          status?: Database["public"]["Enums"]["task_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          aspect_ratio?: string | null
+          assignee_id?: string | null
+          brand_guidelines?: string | null
+          bug_severity?: string | null
+          content_asset_link?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          environment?: string | null
+          id?: string
+          moodboard_link?: string | null
+          priority?: Database["public"]["Enums"]["task_priority"]
+          project_id?: string
+          repo_link?: string | null
+          request_date?: string | null
+          result_link?: string | null
+          status?: Database["public"]["Enums"]["task_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_assignee_id_fkey"
+            columns: ["assignee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_company: { Args: { _user_id: string }; Returns: string }
+      get_user_division: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["app_division"]
+      }
+      get_user_role: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
+      is_admin_or_above: { Args: { _user_id: string }; Returns: boolean }
+      is_super_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      app_division: "creative" | "developer"
+      app_role: "super_admin" | "admin" | "member"
+      project_status: "planning" | "ongoing" | "completed" | "archived"
+      task_priority: "low" | "medium" | "high" | "urgent"
+      task_status: "todo" | "doing" | "review" | "done"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +377,12 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_division: ["creative", "developer"],
+      app_role: ["super_admin", "admin", "member"],
+      project_status: ["planning", "ongoing", "completed", "archived"],
+      task_priority: ["low", "medium", "high", "urgent"],
+      task_status: ["todo", "doing", "review", "done"],
+    },
   },
 } as const
