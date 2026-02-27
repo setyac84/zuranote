@@ -54,22 +54,22 @@ const Projects = () => {
   };
 
   return (
-    <div className="max-w-5xl">
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 flex items-center justify-between">
+    <div className="max-w-5xl mx-auto">
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Projects</h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Projects</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
             {isSuperAdmin ? 'All projects' : isAdmin ? `All ${activeDivision} division projects` : 'Projects you\'re involved in'}
           </p>
         </div>
         {isAdmin && (
-          <button onClick={handleCreate} className="flex items-center gap-1.5 px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
+          <button onClick={handleCreate} className="flex items-center gap-1.5 px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
             <Plus className="w-4 h-4" /> Add Project
           </button>
         )}
       </motion.div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {visibleProjects.map((project, i) => (
           <ProjectCard key={project.id} project={project} index={i} onClick={() => handleCardClick(project)} onNavigate={() => navigate(`/tasks?project=${project.id}`)} />
         ))}

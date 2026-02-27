@@ -151,17 +151,17 @@ const TaskListPage = () => {
   }
 
   return (
-    <div className="max-w-6xl">
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 flex items-center justify-between">
+    <div className="max-w-6xl mx-auto">
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">{title}</h1>
-          <p className="text-sm text-muted-foreground mt-1">{filteredTasks.length} tasks found</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">{title}</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">{filteredTasks.length} tasks found</p>
         </div>
         <div className="flex items-center gap-3">
           {isAdmin && (
             <button
               onClick={() => setShowCreateModal(true)}
-              className="flex items-center gap-1.5 px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
             >
               <Plus className="w-4 h-4" /> Add Task
             </button>
@@ -185,8 +185,8 @@ const TaskListPage = () => {
 
       {viewMode === 'list' ? (
         <div className="glass-card rounded-xl overflow-hidden">
-          {/* Header: project-company > task > description > priority > due date > status > assignee */}
-          <div className="grid grid-cols-[140px_1fr_1.5fr_90px_90px_110px_110px] gap-2 px-4 py-2.5 border-b border-border text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
+          {/* Header - desktop only */}
+          <div className="hidden lg:grid grid-cols-[140px_1fr_1.5fr_90px_90px_110px_110px] gap-2 px-4 py-2.5 border-b border-border text-[11px] font-medium text-muted-foreground uppercase tracking-wide">
             <span>Project · Company</span>
             <span>Task</span>
             <span>Description</span>
@@ -205,21 +205,33 @@ const TaskListPage = () => {
                 animate={{ opacity: 1 }}
                 transition={{ delay: i * 0.03 }}
                 onClick={() => setSelectedTask(task)}
-                className="grid grid-cols-[140px_1fr_1.5fr_90px_90px_110px_110px] gap-2 px-4 py-3 border-b border-border/50 hover:bg-secondary/30 cursor-pointer transition-colors items-center"
+                className="cursor-pointer transition-colors"
               >
-                <span className="text-[10px] text-muted-foreground">{projectName} · {companyName}</span>
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className={cn('w-2 h-2 rounded-full shrink-0', priorityDot[task.priority])} />
-                  <span className="text-sm text-foreground font-medium">{task.title}</span>
+                {/* Desktop row */}
+                <div className="hidden lg:grid grid-cols-[140px_1fr_1.5fr_90px_90px_110px_110px] gap-2 px-4 py-3 border-b border-border/50 hover:bg-secondary/30 items-center">
+                  <span className="text-[10px] text-muted-foreground">{projectName} · {companyName}</span>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className={cn('w-2 h-2 rounded-full shrink-0', priorityDot[task.priority])} />
+                    <span className="text-sm text-foreground font-medium">{task.title}</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground line-clamp-2">{task.description}</span>
+                  <span className={cn('text-xs capitalize', priorityLabel[task.priority])}>{task.priority}</span>
+                  <span className="text-xs text-muted-foreground">{formatDate(task.due_date)}</span>
+                  <InlineStatusDropdown value={task.status} onChange={(s) => handleStatusChange(task.id, s)} />
+                  <span className="text-xs text-muted-foreground truncate">{assignee?.name.split(' ')[0]}</span>
                 </div>
-                <span className="text-xs text-muted-foreground line-clamp-2">{task.description}</span>
-                <span className={cn('text-xs capitalize', priorityLabel[task.priority])}>{task.priority}</span>
-                <span className="text-xs text-muted-foreground">{formatDate(task.due_date)}</span>
-                <InlineStatusDropdown
-                  value={task.status}
-                  onChange={(s) => handleStatusChange(task.id, s)}
-                />
-                <span className="text-xs text-muted-foreground truncate">{assignee?.name.split(' ')[0]}</span>
+                {/* Mobile card */}
+                <div className="lg:hidden p-3 border-b border-border/50 hover:bg-secondary/30">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm font-medium text-foreground">{task.title}</span>
+                    <span className={cn('text-[10px] capitalize font-medium', priorityLabel[task.priority])}>{task.priority}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-2 line-clamp-1">{task.description}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] text-muted-foreground">{assignee?.name.split(' ')[0]} · {formatDate(task.due_date)}</span>
+                    <InlineStatusDropdown value={task.status} onChange={(s) => handleStatusChange(task.id, s)} />
+                  </div>
+                </div>
               </motion.div>
             );
           })}
@@ -228,7 +240,7 @@ const TaskListPage = () => {
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredTasks.map((task, i) => {
             const assignee = mockUsers.find(u => u.id === task.assignee_id);
             const { projectName, companyName } = getProjectCompany(task.project_id);
@@ -270,7 +282,7 @@ const TaskListPage = () => {
             );
           })}
           {filteredTasks.length === 0 && (
-            <div className="col-span-3 text-center py-12 text-muted-foreground text-sm">No tasks found.</div>
+            <div className="col-span-1 sm:col-span-2 lg:col-span-3 text-center py-12 text-muted-foreground text-sm">No tasks found.</div>
           )}
         </div>
       )}
