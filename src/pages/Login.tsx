@@ -14,10 +14,10 @@ const Login = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (!email.trim()) { setError('Email wajib diisi'); return; }
+    if (!email.trim()) { setError('Email is required'); return; }
     const success = login(email, password);
     if (success) navigate('/dashboard');
-    else setError('Email tidak ditemukan.');
+    else setError('Email not found.');
   };
 
   const demoAccounts = [
@@ -39,8 +39,8 @@ const Login = () => {
         </div>
 
         <div className="glass-card rounded-2xl p-8">
-          <h2 className="text-xl font-semibold text-foreground mb-1">Masuk ke akun Anda</h2>
-          <p className="text-muted-foreground text-sm mb-6">Kelola project dan task tim Anda</p>
+          <h2 className="text-xl font-semibold text-foreground mb-1">Sign in to your account</h2>
+          <p className="text-muted-foreground text-sm mb-6">Manage your projects and team tasks</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -59,12 +59,12 @@ const Login = () => {
             {error && <p className="text-destructive text-sm">{error}</p>}
 
             <button type="submit" className="w-full h-10 rounded-lg bg-primary text-primary-foreground font-medium text-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
-              Masuk <ArrowRight className="w-4 h-4" />
+              Sign In <ArrowRight className="w-4 h-4" />
             </button>
           </form>
 
           <div className="mt-6 pt-6 border-t border-border">
-            <p className="text-xs text-muted-foreground mb-3">Demo akun (klik untuk login cepat):</p>
+            <p className="text-xs text-muted-foreground mb-3">Demo accounts (click to quick login):</p>
             <div className="grid grid-cols-2 gap-2">
               {demoAccounts.map(acc => (
                 <button key={acc.email} onClick={() => setEmail(acc.email)}

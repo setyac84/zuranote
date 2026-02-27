@@ -172,7 +172,7 @@ const Dashboard = () => {
             Hello, {user.name.split(' ')[0]} 👋
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {isSuperAdmin ? 'Semua divisi & project' : isAdmin ? `Ringkasan progress divisi ${activeDivision}` : 'Ringkasan task yang di-assign ke Anda'}
+            {isSuperAdmin ? 'All divisions & projects' : isAdmin ? `Overview of ${activeDivision} division` : 'Summary of tasks assigned to you'}
           </p>
         </div>
         {isAdmin && (
@@ -211,7 +211,7 @@ const Dashboard = () => {
             </div>
             <button onClick={() => { setShowAddMember(true); setMemberForm({ role: 'member', division: activeDivision }); }}
               className="flex items-center gap-1 px-3 py-1.5 text-xs rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
-              <Plus className="w-3 h-3" /> Tambah
+              <Plus className="w-3 h-3" /> Add
             </button>
           </div>
 
@@ -220,7 +220,7 @@ const Dashboard = () => {
             <div className="border border-border rounded-lg p-4 mb-4 space-y-3">
               <div className="grid grid-cols-4 gap-3">
                 <input value={memberForm.name || ''} onChange={e => setMemberForm(f => ({ ...f, name: e.target.value }))}
-                  className="bg-secondary/50 border border-border rounded-lg px-3 py-2 text-sm text-foreground" placeholder="Nama" />
+                  className="bg-secondary/50 border border-border rounded-lg px-3 py-2 text-sm text-foreground" placeholder="Name" />
                 <input value={memberForm.email || ''} onChange={e => setMemberForm(f => ({ ...f, email: e.target.value }))}
                   className="bg-secondary/50 border border-border rounded-lg px-3 py-2 text-sm text-foreground" placeholder="Email" />
                 <select value={memberForm.role || 'member'} onChange={e => setMemberForm(f => ({ ...f, role: e.target.value as UserRole }))}
@@ -237,7 +237,7 @@ const Dashboard = () => {
                 <button onClick={handleSaveMember} className="px-3 py-1.5 text-sm rounded-lg bg-primary text-primary-foreground">
                   <Save className="w-3.5 h-3.5 inline mr-1" />Save
                 </button>
-                <button onClick={() => { setShowAddMember(false); setMemberForm({}); }} className="px-3 py-1.5 text-sm rounded-lg bg-secondary text-secondary-foreground">Batal</button>
+                <button onClick={() => { setShowAddMember(false); setMemberForm({}); }} className="px-3 py-1.5 text-sm rounded-lg bg-secondary text-secondary-foreground">Cancel</button>
               </div>
             </div>
           )}
@@ -269,7 +269,7 @@ const Dashboard = () => {
                     </div>
                     <div className="flex gap-2">
                       <button onClick={handleSaveMember} className="px-3 py-1 text-xs rounded-lg bg-primary text-primary-foreground">Save</button>
-                      <button onClick={() => { setEditingMember(null); setMemberForm({}); }} className="px-3 py-1 text-xs rounded-lg bg-secondary text-secondary-foreground">Batal</button>
+                      <button onClick={() => { setEditingMember(null); setMemberForm({}); }} className="px-3 py-1 text-xs rounded-lg bg-secondary text-secondary-foreground">Cancel</button>
                     </div>
                   </div>
                 );
@@ -295,8 +295,8 @@ const Dashboard = () => {
                     </button>
                     {showDeleteMember === member.id ? (
                       <div className="flex items-center gap-1">
-                        <button onClick={() => handleDeleteMember(member.id)} className="px-2 py-1 text-[10px] rounded bg-destructive text-destructive-foreground">Ya</button>
-                        <button onClick={() => setShowDeleteMember(null)} className="px-2 py-1 text-[10px] rounded bg-secondary text-secondary-foreground">Tidak</button>
+                         <button onClick={() => handleDeleteMember(member.id)} className="px-2 py-1 text-[10px] rounded bg-destructive text-destructive-foreground">Yes</button>
+                         <button onClick={() => setShowDeleteMember(null)} className="px-2 py-1 text-[10px] rounded bg-secondary text-secondary-foreground">No</button>
                       </div>
                     ) : (
                       <button onClick={() => setShowDeleteMember(member.id)}
@@ -318,9 +318,9 @@ const Dashboard = () => {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 text-destructive" />
-              <h2 className="text-sm font-semibold text-foreground">Task Prioritas Tinggi</h2>
+              <h2 className="text-sm font-semibold text-foreground">High Priority Tasks</h2>
             </div>
-            <button onClick={() => navigate('/tasks?priority=high,urgent')} className="text-xs text-primary hover:underline">Lihat Semua</button>
+            <button onClick={() => navigate('/tasks?priority=high,urgent')} className="text-xs text-primary hover:underline">View All</button>
           </div>
           {/* Table header matching tasks page */}
           <div className="grid grid-cols-[140px_1fr_1.5fr_90px_90px_110px_110px] gap-2 px-4 py-2.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wide border-b border-border">

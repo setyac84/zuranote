@@ -109,7 +109,7 @@ const ProjectModal = ({ project, division, isOpen, onClose, onSave, onDelete, mo
               {/* Header */}
               <div className="flex items-center justify-between p-6 pb-4">
                 <h2 className="text-lg font-semibold text-foreground">
-                  {mode === 'create' ? 'Tambah Project' : mode === 'edit' ? 'Edit Project' : 'Detail Project'}
+                  {mode === 'create' ? 'New Project' : mode === 'edit' ? 'Edit Project' : 'Project Details'}
                 </h2>
                 <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors p-1">
                   <X className="w-5 h-5" />
@@ -137,13 +137,13 @@ const ProjectModal = ({ project, division, isOpen, onClose, onSave, onDelete, mo
 
                 {/* Project Name */}
                 <div>
-                  <label className={labelCls}>Nama Project</label>
+                  <label className={labelCls}>Project Name</label>
                   {isEditable ? (
                     <input
                       value={form.name}
                       onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                       className={inputCls}
-                      placeholder="Nama project..."
+                      placeholder="Project name..."
                     />
                   ) : (
                     <p className="text-sm text-foreground">{form.name}</p>
@@ -152,13 +152,13 @@ const ProjectModal = ({ project, division, isOpen, onClose, onSave, onDelete, mo
 
                 {/* Description */}
                 <div>
-                  <label className={labelCls}>Deskripsi</label>
+                  <label className={labelCls}>Description</label>
                   {isEditable ? (
                     <textarea
                       value={form.description}
                       onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                       className={cn(inputCls, 'min-h-[80px] resize-none')}
-                      placeholder="Deskripsi project..."
+                      placeholder="Project description..."
                     />
                   ) : (
                     <p className="text-sm text-foreground">{form.description}</p>
@@ -228,7 +228,7 @@ const ProjectModal = ({ project, division, isOpen, onClose, onSave, onDelete, mo
                           onClick={() => setShowDeleteConfirm(true)}
                           className="flex items-center gap-1.5 px-4 py-2 text-sm rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
                         >
-                          <Trash2 className="w-3.5 h-3.5" /> Hapus
+                          <Trash2 className="w-3.5 h-3.5" /> Delete
                         </button>
                       )}
                     </>
@@ -247,7 +247,7 @@ const ProjectModal = ({ project, division, isOpen, onClose, onSave, onDelete, mo
                           onClick={() => setMode('view')}
                           className="px-4 py-2 text-sm rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"
                         >
-                          Batal
+                           Cancel
                         </button>
                       )}
                     </>
@@ -257,13 +257,13 @@ const ProjectModal = ({ project, division, isOpen, onClose, onSave, onDelete, mo
                 {/* Delete Confirmation */}
                 {showDeleteConfirm && (
                   <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
-                    <p className="text-sm text-foreground mb-3">Yakin ingin menghapus project ini?</p>
-                    <div className="flex gap-2">
-                      <button onClick={handleDelete} className="px-3 py-1.5 text-sm rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                        Ya, Hapus
-                      </button>
-                      <button onClick={() => setShowDeleteConfirm(false)} className="px-3 py-1.5 text-sm rounded-lg bg-secondary text-secondary-foreground">
-                        Batal
+                     <p className="text-sm text-foreground mb-3">Are you sure you want to delete this project?</p>
+                     <div className="flex gap-2">
+                       <button onClick={handleDelete} className="px-3 py-1.5 text-sm rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                         Yes, Delete
+                       </button>
+                       <button onClick={() => setShowDeleteConfirm(false)} className="px-3 py-1.5 text-sm rounded-lg bg-secondary text-secondary-foreground">
+                         Cancel
                       </button>
                     </div>
                   </div>

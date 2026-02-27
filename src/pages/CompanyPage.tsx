@@ -53,15 +53,15 @@ const CompanyPage = () => {
     <div className="max-w-3xl">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Company</h1>
-          <p className="text-sm text-muted-foreground mt-1">Kelola daftar company untuk project</p>
+          <h1 className="text-2xl font-bold text-foreground">Companies</h1>
+          <p className="text-sm text-muted-foreground mt-1">Manage companies for your projects</p>
         </div>
         {isAdmin && (
           <button
             onClick={() => { setShowCreate(true); setForm({ name: '', description: '' }); }}
             className="flex items-center gap-1.5 px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
           >
-            <Plus className="w-4 h-4" /> Tambah Company
+            <Plus className="w-4 h-4" /> Add Company
           </button>
         )}
       </motion.div>
@@ -76,16 +76,16 @@ const CompanyPage = () => {
             className="glass-card rounded-xl p-5 mb-4 overflow-hidden"
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-semibold text-foreground">Company Baru</h3>
+              <h3 className="text-sm font-semibold text-foreground">New Company</h3>
               <button onClick={() => setShowCreate(false)} className="text-muted-foreground hover:text-foreground">
                 <X className="w-4 h-4" />
               </button>
             </div>
             <div className="space-y-3">
-              <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className={inputCls} placeholder="Nama company..." />
-              <input value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} className={inputCls} placeholder="Deskripsi..." />
+              <input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className={inputCls} placeholder="Company name..." />
+              <input value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} className={inputCls} placeholder="Description..." />
               <button onClick={handleCreate} disabled={!form.name.trim()} className="flex items-center gap-1.5 px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50">
-                <Save className="w-3.5 h-3.5" /> Simpan
+                <Save className="w-3.5 h-3.5" /> Save
               </button>
             </div>
           </motion.div>
@@ -111,7 +111,7 @@ const CompanyPage = () => {
                     <Save className="w-3.5 h-3.5" /> Save
                   </button>
                   <button onClick={() => setEditingId(null)} className="px-3 py-1.5 text-sm rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors">
-                    Batal
+                    Cancel
                   </button>
                 </div>
               </div>
@@ -133,8 +133,8 @@ const CompanyPage = () => {
                     </button>
                     {deleteConfirm === company.id ? (
                       <div className="flex items-center gap-1">
-                        <button onClick={() => handleDelete(company.id)} className="px-2 py-1 text-xs rounded bg-destructive text-destructive-foreground">Ya</button>
-                        <button onClick={() => setDeleteConfirm(null)} className="px-2 py-1 text-xs rounded bg-secondary text-secondary-foreground">Batal</button>
+                        <button onClick={() => handleDelete(company.id)} className="px-2 py-1 text-xs rounded bg-destructive text-destructive-foreground">Yes</button>
+                        <button onClick={() => setDeleteConfirm(null)} className="px-2 py-1 text-xs rounded bg-secondary text-secondary-foreground">No</button>
                       </div>
                     ) : (
                       <button onClick={() => setDeleteConfirm(company.id)} className="p-2 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors">
@@ -148,7 +148,7 @@ const CompanyPage = () => {
           </motion.div>
         ))}
         {companies.length === 0 && (
-          <div className="text-center py-20 text-muted-foreground text-sm">Belum ada company.</div>
+          <div className="text-center py-20 text-muted-foreground text-sm">No companies yet.</div>
         )}
       </div>
     </div>

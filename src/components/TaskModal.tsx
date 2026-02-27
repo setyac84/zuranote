@@ -49,7 +49,7 @@ const ModalDropdown = <T extends string>({
         onClick={() => setOpen(!open)}
         className="flex items-center justify-between w-full bg-secondary/50 border border-border rounded-xl px-3 py-2 text-sm text-foreground hover:border-primary/40 transition-colors"
       >
-        <span className={!selected ? 'text-muted-foreground' : ''}>{selected?.label || placeholder || 'Pilih...'}</span>
+        <span className={!selected ? 'text-muted-foreground' : ''}>{selected?.label || placeholder || 'Select...'}</span>
         <ChevronDown className="w-4 h-4 text-muted-foreground" />
       </button>
       {open && (
@@ -218,7 +218,7 @@ const TaskModal = ({ task, division, isOpen, onClose, onUpdate, onDelete, readOn
                       value={form.project_id || ''}
                       onChange={(v) => setForm(f => ({ ...f, project_id: v }))}
                       options={projectOptions}
-                      placeholder="Pilih Project"
+                      placeholder="Select Project"
                     />
                   ) : (
                     <p className="text-sm text-foreground">{getProjectWithCompany(displayTask.project_id as string)}</p>
@@ -234,7 +234,7 @@ const TaskModal = ({ task, division, isOpen, onClose, onUpdate, onDelete, readOn
                         value={form.assignee_id || ''}
                         onChange={(v) => setForm(f => ({ ...f, assignee_id: v }))}
                         options={assigneeOptions}
-                        placeholder="Pilih Assignee"
+                        placeholder="Select Assignee"
                       />
                     ) : (
                       <div className="flex items-center gap-2">
@@ -304,26 +304,26 @@ const TaskModal = ({ task, division, isOpen, onClose, onUpdate, onDelete, readOn
 
                 {/* 3. Task Title & Description */}
                 <div>
-                  <label className={labelCls}>Judul Task</label>
+                  <label className={labelCls}>Task Title</label>
                   {isEditable ? (
                     <input
                       value={form.title || ''}
                       onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
                       className={cn(inputCls, 'font-semibold')}
-                      placeholder="Judul task..."
+                      placeholder="Task title..."
                     />
                   ) : (
                     <h2 className="text-lg font-semibold text-foreground">{displayTask.title}</h2>
                   )}
                 </div>
                 <div>
-                  <label className={labelCls}>Deskripsi</label>
+                  <label className={labelCls}>Description</label>
                   {isEditable ? (
                     <textarea
                       value={form.description || ''}
                       onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                       className={cn(inputCls, 'min-h-[60px] resize-none')}
-                      placeholder="Deskripsi task..."
+                      placeholder="Task description..."
                     />
                   ) : (
                     <p className="text-sm text-foreground">{displayTask.description}</p>
@@ -333,17 +333,17 @@ const TaskModal = ({ task, division, isOpen, onClose, onUpdate, onDelete, readOn
                 {/* 4. Creative fields */}
                 {division === 'creative' && (
                   <div className="border-t border-border pt-4">
-                    <p className="text-xs font-medium text-muted-foreground mb-3">Detail Creative</p>
+                    <p className="text-xs font-medium text-muted-foreground mb-3">Creative Details</p>
                     <div className="space-y-3">
                       {isEditable ? (
                         <>
                           <div>
                             <label className={labelCls}>Content Asset</label>
-                            <input value={form.content_asset_link || ''} onChange={e => setForm(f => ({ ...f, content_asset_link: e.target.value }))} className={inputCls} placeholder="Link atau deskripsi asset..." />
+                            <input value={form.content_asset_link || ''} onChange={e => setForm(f => ({ ...f, content_asset_link: e.target.value }))} className={inputCls} placeholder="Link or description of asset..." />
                           </div>
                           <div>
                             <label className={labelCls}>Moodboard</label>
-                            <input value={form.moodboard_link || ''} onChange={e => setForm(f => ({ ...f, moodboard_link: e.target.value }))} className={inputCls} placeholder="Link atau deskripsi moodboard..." />
+                            <input value={form.moodboard_link || ''} onChange={e => setForm(f => ({ ...f, moodboard_link: e.target.value }))} className={inputCls} placeholder="Link or moodboard description..." />
                           </div>
                           <div>
                             <label className={labelCls}>Visual Direction</label>
@@ -383,7 +383,7 @@ const TaskModal = ({ task, division, isOpen, onClose, onUpdate, onDelete, readOn
                 {/* Developer fields */}
                 {division === 'developer' && (
                   <div className="border-t border-border pt-4">
-                    <p className="text-xs font-medium text-muted-foreground mb-3">Detail Developer</p>
+                    <p className="text-xs font-medium text-muted-foreground mb-3">Developer Details</p>
                     <div className="space-y-3">
                       {isEditable ? (
                         <>
@@ -454,7 +454,7 @@ const TaskModal = ({ task, division, isOpen, onClose, onUpdate, onDelete, readOn
                           onClick={() => setShowDeleteConfirm(true)}
                           className="flex items-center gap-1.5 px-4 py-2 text-sm rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
                         >
-                          <Trash2 className="w-3.5 h-3.5" /> Hapus
+                          <Trash2 className="w-3.5 h-3.5" /> Delete
                         </button>
                       )}
                     </>
@@ -469,8 +469,8 @@ const TaskModal = ({ task, division, isOpen, onClose, onUpdate, onDelete, readOn
                         <Save className="w-3.5 h-3.5" /> Save
                       </button>
                       {mode === 'edit' && (
-                        <button onClick={() => { setMode('view'); setForm(task ? { ...task } : {}); }} className="px-4 py-2 text-sm rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors">
-                          Batal
+                       <button onClick={() => { setMode('view'); setForm(task ? { ...task } : {}); }} className="px-4 py-2 text-sm rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors">
+                           Cancel
                         </button>
                       )}
                     </>
@@ -480,10 +480,10 @@ const TaskModal = ({ task, division, isOpen, onClose, onUpdate, onDelete, readOn
                 {/* Delete Confirmation */}
                 {showDeleteConfirm && (
                   <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
-                    <p className="text-sm text-foreground mb-3">Yakin ingin menghapus task ini?</p>
+                    <p className="text-sm text-foreground mb-3">Are you sure you want to delete this task?</p>
                     <div className="flex gap-2">
-                      <button onClick={handleDelete} className="px-3 py-1.5 text-sm rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90">Ya, Hapus</button>
-                      <button onClick={() => setShowDeleteConfirm(false)} className="px-3 py-1.5 text-sm rounded-lg bg-secondary text-secondary-foreground">Batal</button>
+                      <button onClick={handleDelete} className="px-3 py-1.5 text-sm rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90">Yes, Delete</button>
+                      <button onClick={() => setShowDeleteConfirm(false)} className="px-3 py-1.5 text-sm rounded-lg bg-secondary text-secondary-foreground">Cancel</button>
                     </div>
                   </div>
                 )}

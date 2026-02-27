@@ -138,16 +138,16 @@ const TaskListPage = () => {
     return { projectName: project.name, companyName: company?.name || '-' };
   };
 
-  let title = 'Semua Task';
-  if (statusFilter) title = `Task: ${statusLabel[statusFilter]}`;
+  let title = 'All Tasks';
+  if (statusFilter) title = `Tasks: ${statusLabel[statusFilter]}`;
   if (memberFilter) {
     const m = mockUsers.find(u => u.id === memberFilter);
-    title = `Task ${m?.name || ''}`;
+    title = `Tasks by ${m?.name || ''}`;
   }
-  if (priorityFilter) title = 'Task Prioritas Tinggi';
+  if (priorityFilter) title = 'High Priority Tasks';
   if (projectFilter) {
     const p = mockProjects.find(pr => pr.id === projectFilter);
-    title = `Task: ${p?.name || ''}`;
+    title = `Tasks: ${p?.name || ''}`;
   }
 
   return (
@@ -155,7 +155,7 @@ const TaskListPage = () => {
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">{title}</h1>
-          <p className="text-sm text-muted-foreground mt-1">{filteredTasks.length} task ditemukan</p>
+          <p className="text-sm text-muted-foreground mt-1">{filteredTasks.length} tasks found</p>
         </div>
         <div className="flex items-center gap-3">
           {isAdmin && (
@@ -163,7 +163,7 @@ const TaskListPage = () => {
               onClick={() => setShowCreateModal(true)}
               className="flex items-center gap-1.5 px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
             >
-              <Plus className="w-4 h-4" /> Tambah Task
+              <Plus className="w-4 h-4" /> Add Task
             </button>
           )}
           <div className="flex items-center gap-1 bg-secondary rounded-lg p-1">
@@ -224,7 +224,7 @@ const TaskListPage = () => {
             );
           })}
           {filteredTasks.length === 0 && (
-            <div className="text-center py-12 text-muted-foreground text-sm">Tidak ada task.</div>
+            <div className="text-center py-12 text-muted-foreground text-sm">No tasks found.</div>
           )}
         </div>
       ) : (
@@ -270,7 +270,7 @@ const TaskListPage = () => {
             );
           })}
           {filteredTasks.length === 0 && (
-            <div className="col-span-3 text-center py-12 text-muted-foreground text-sm">Tidak ada task.</div>
+            <div className="col-span-3 text-center py-12 text-muted-foreground text-sm">No tasks found.</div>
           )}
         </div>
       )}

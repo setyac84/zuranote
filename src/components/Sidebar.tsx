@@ -71,7 +71,7 @@ const Sidebar = () => {
       {/* Division Switcher */}
       {canSwitchDivision && (
         <div className={cn('px-3 pt-2 pb-2', collapsed && 'px-2')}>
-          {!collapsed && <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2 px-2">Divisi</p>}
+          {!collapsed && <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold mb-2 px-2">Division</p>}
           <div className="space-y-1">
             {divisionOptions.map(opt => (
               <button
