@@ -1,3 +1,4 @@
+import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatDate } from '@/lib/formatDate';
 import { mockProjects, mockTasks, mockUsers, mockCompanies } from '@/data/mock';
@@ -164,23 +165,23 @@ const Dashboard = () => {
     });
 
   return (
-    <div className="max-w-5xl">
+    <div className="max-w-5xl mx-auto">
       {/* Header */}
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8 flex items-center justify-between">
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 lg:mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">
             Hello, {user.name.split(' ')[0]} 👋
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
             {isSuperAdmin ? 'All divisions & projects' : isAdmin ? `Overview of ${activeDivision} division` : 'Summary of tasks assigned to you'}
           </p>
         </div>
         {isAdmin && (
           <div className="flex items-center gap-2">
-            <button onClick={() => setShowCreateProject(true)} className="flex items-center gap-1.5 px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
+            <button onClick={() => setShowCreateProject(true)} className="flex items-center gap-1.5 px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
               <Plus className="w-4 h-4" /> New Project
             </button>
-            <button onClick={() => setShowCreateTask(true)} className="flex items-center gap-1.5 px-4 py-2 text-sm rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors">
+            <button onClick={() => setShowCreateTask(true)} className="flex items-center gap-1.5 px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors">
               <Plus className="w-4 h-4" /> New Task
             </button>
           </div>
@@ -188,7 +189,7 @@ const Dashboard = () => {
       </motion.div>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 lg:mb-8">
         {stats.map((stat, i) => (
           <motion.div key={stat.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
             onClick={stat.onClick} className="glass-card rounded-xl p-4 cursor-pointer hover:border-primary/30 transition-all">
@@ -218,7 +219,7 @@ const Dashboard = () => {
           {/* Add Member Form */}
           {showAddMember && (
             <div className="border border-border rounded-lg p-4 mb-4 space-y-3">
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 <input value={memberForm.name || ''} onChange={e => setMemberForm(f => ({ ...f, name: e.target.value }))}
                   className="bg-secondary/50 border border-border rounded-lg px-3 py-2 text-sm text-foreground" placeholder="Name" />
                 <input value={memberForm.email || ''} onChange={e => setMemberForm(f => ({ ...f, email: e.target.value }))}
@@ -252,7 +253,7 @@ const Dashboard = () => {
               if (isEditing) {
                 return (
                   <div key={member.id} className="border border-border rounded-lg p-3 space-y-2">
-                    <div className="grid grid-cols-4 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
                       <input value={memberForm.name || ''} onChange={e => setMemberForm(f => ({ ...f, name: e.target.value }))}
                         className="bg-secondary/50 border border-border rounded-lg px-3 py-1.5 text-sm text-foreground" />
                       <input value={memberForm.email || ''} onChange={e => setMemberForm(f => ({ ...f, email: e.target.value }))}
@@ -323,7 +324,8 @@ const Dashboard = () => {
             <button onClick={() => navigate('/tasks?priority=high,urgent')} className="text-xs text-primary hover:underline">View All</button>
           </div>
           {/* Table header matching tasks page */}
-          <div className="grid grid-cols-[140px_1fr_1.5fr_90px_90px_110px_110px] gap-2 px-4 py-2.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wide border-b border-border">
+          {/* Table header - hidden on mobile, show card view instead */}
+          <div className="hidden lg:grid grid-cols-[140px_1fr_1.5fr_90px_90px_110px_110px] gap-2 px-4 py-2.5 text-[11px] font-medium text-muted-foreground uppercase tracking-wide border-b border-border">
             <span>Project · Company</span>
             <span>Task</span>
             <span>Description</span>
@@ -336,19 +338,33 @@ const Dashboard = () => {
             const assignee = mockUsers.find(u => u.id === task.assignee_id);
             const { projectName, companyName } = getProjectCompany(task.project_id);
             return (
-              <div key={task.id} onClick={() => setSelectedTask(task)}
-                className="grid grid-cols-[140px_1fr_1.5fr_90px_90px_110px_110px] gap-2 px-4 py-3 border-b border-border/50 hover:bg-secondary/30 cursor-pointer transition-colors items-center">
-                <span className="text-[10px] text-muted-foreground">{projectName} · {companyName}</span>
-                <div className="flex items-center gap-2 min-w-0">
-                  <div className={cn('w-2 h-2 rounded-full shrink-0', priorityDot[task.priority])} />
-                  <span className="text-sm text-foreground font-medium">{task.title}</span>
+              <React.Fragment key={task.id}>
+                <div onClick={() => setSelectedTask(task)}
+                  className="hidden lg:grid grid-cols-[140px_1fr_1.5fr_90px_90px_110px_110px] gap-2 px-4 py-3 border-b border-border/50 hover:bg-secondary/30 cursor-pointer transition-colors items-center">
+                  <span className="text-[10px] text-muted-foreground">{projectName} · {companyName}</span>
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className={cn('w-2 h-2 rounded-full shrink-0', priorityDot[task.priority])} />
+                    <span className="text-sm text-foreground font-medium">{task.title}</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground line-clamp-2">{task.description}</span>
+                  <span className={cn('text-xs capitalize', priorityLabel[task.priority])}>{task.priority}</span>
+                  <span className="text-xs text-muted-foreground">{formatDate(task.due_date)}</span>
+                  <InlineStatusDropdown value={task.status} onChange={(s) => handleStatusChange(task.id, s)} />
+                  <span className="text-xs text-muted-foreground">{assignee?.name.split(' ')[0]}</span>
                 </div>
-                <span className="text-xs text-muted-foreground line-clamp-2">{task.description}</span>
-                <span className={cn('text-xs capitalize', priorityLabel[task.priority])}>{task.priority}</span>
-                <span className="text-xs text-muted-foreground">{formatDate(task.due_date)}</span>
-                <InlineStatusDropdown value={task.status} onChange={(s) => handleStatusChange(task.id, s)} />
-                <span className="text-xs text-muted-foreground">{assignee?.name.split(' ')[0]}</span>
-              </div>
+                <div onClick={() => setSelectedTask(task)}
+                  className="lg:hidden p-3 border-b border-border/50 hover:bg-secondary/30 cursor-pointer transition-colors">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm font-medium text-foreground">{task.title}</span>
+                    <span className={cn('text-[10px] capitalize', priorityLabel[task.priority])}>{task.priority}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-2 line-clamp-1">{task.description}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] text-muted-foreground">{assignee?.name.split(' ')[0]} · {formatDate(task.due_date)}</span>
+                    <InlineStatusDropdown value={task.status} onChange={(s) => handleStatusChange(task.id, s)} />
+                  </div>
+                </div>
+              </React.Fragment>
             );
           })}
         </motion.div>

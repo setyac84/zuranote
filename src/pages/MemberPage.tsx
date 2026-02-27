@@ -62,7 +62,7 @@ const MemberPage = () => {
 
   const renderForm = (isInline = false) => (
     <div className={cn('space-y-3', isInline ? 'border border-border rounded-lg p-4' : 'glass-card rounded-xl p-5 mb-4')}>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label className="text-xs font-medium text-muted-foreground mb-1 block">Name</label>
           <input value={form.name || ''} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} className={cn(inputCls, 'w-full')} placeholder="Full name" />
@@ -105,8 +105,8 @@ const MemberPage = () => {
   );
 
   return (
-    <div className="max-w-3xl">
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 flex items-center justify-between">
+    <div className="max-w-3xl mx-auto">
+      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-foreground">Members</h1>
           <p className="text-sm text-muted-foreground mt-1">
@@ -135,7 +135,7 @@ const MemberPage = () => {
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
-              className="glass-card rounded-xl p-4 flex items-center justify-between"
+              className="glass-card rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
             >
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-sm font-semibold text-primary">
