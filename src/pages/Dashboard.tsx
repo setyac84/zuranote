@@ -95,6 +95,9 @@ const Dashboard = () => {
     return { projectName: project.name, companyName: company?.name || '-' };
   };
 
+  const today = format(new Date(), 'yyyy-MM-dd');
+  const todayTasks = myTasks.filter((t) => t.due_date === today && t.status !== 'done');
+
   const highPriorityTasks = myTasks.
   filter((t) => (t.priority === 'urgent' || t.priority === 'high') && t.status !== 'done').
   sort((a, b) => {
@@ -190,6 +193,51 @@ const Dashboard = () => {
 
         {/* Right column: High Priority + Calendar */}
         <div className="flex flex-col gap-4 lg:gap-5">
+          {/* Today's Tasks */}
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="glass-card rounded-xl p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <Clock className="w-4 h-4 text-primary" />
+              <h2 className="text-sm font-semibold text-foreground">Task Today!</h2>
+            </div>
+            {todayTasks.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-6 text-center">
+                <span className="text-4xl mb-2">🎉</span>
+                <p className="text-sm font-semibold text-foreground">Congrats! No task today!</p>
+                <p className="text-xs text-muted-foreground mt-1">Enjoy your free time or get ahead on tomorrow's work.</p>
+              </div>
+            ) : (
+              <div className="space-y-0 divide-y divide-border/50">
+                {todayTasks.map((task) => {
+                  const assignee = allMembers.find((u) => u.id === task.assignee_id);
+                  const { projectName, companyName } = getProjectCompany(task.project_id);
+                  return (
+                    <div key={task.id} onClick={() => setSelectedTask(task)} className="py-3 hover:bg-secondary/30 cursor-pointer transition-colors">
+                      <p className="text-[10px] text-muted-foreground mb-1">{projectName} · {companyName}</p>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-medium text-foreground">{task.title}</span>
+                        <span className={cn('text-[10px] font-semibold capitalize px-2 py-0.5 rounded-md', priorityBadge[task.priority])}>{task.priority}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mb-2 line-clamp-1">{task.description}</p>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          {assignee && (
+                            <div className="flex items-center gap-1.5">
+                              <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-[9px] font-semibold text-primary">
+                                {assignee.name.split(' ').map((n: string) => n[0]).join('')}
+                              </div>
+                              <span className="text-[11px] text-muted-foreground">{assignee.name.split(' ')[0]}</span>
+                            </div>
+                          )}
+                        </div>
+                        <InlineStatusDropdown value={task.status as TaskStatus} onChange={(s) => handleStatusChange(task.id, s)} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </motion.div>
+
           {/* High Priority Tasks */}
           {highPriorityTasks.length > 0 &&
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }} className="glass-card rounded-xl p-5">
