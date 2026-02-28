@@ -51,22 +51,25 @@ const ProjectCard = ({ project, companyName, index, onClick, onNavigate, showArc
 
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.08, duration: 0.35 }}
-      onClick={onClick} className="glass-card rounded-xl p-5 cursor-pointer hover:border-primary/30 transition-all group">
-      <div className="flex items-start justify-between mb-1">
-        <div className="flex items-center gap-2">
-          {/* Status dropdown (left side) */}
+      onClick={onClick} className="glass-card rounded-xl cursor-pointer hover:border-primary/30 transition-all group flex flex-col">
+      
+      {/* Main content area */}
+      <div className="p-5 pb-3 flex-1">
+        {/* Top row: company name + status dropdown */}
+        <div className="flex items-start justify-between mb-1">
+          <p className="text-[10px] text-muted-foreground">{companyName}</p>
           {isAdmin && onStatusChange ? (
             <div ref={statusRef} className="relative">
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); setStatusOpen(!statusOpen); }}
-                className={cn('text-[10px] font-medium px-2 py-0.5 rounded-full capitalize inline-flex items-center gap-1', statusColors[project.status])}
+                className={cn('text-[11px] font-medium px-2.5 py-1 rounded-full capitalize inline-flex items-center gap-1', statusColors[project.status])}
               >
                 {project.status}
-                <ChevronDown className={cn("w-2.5 h-2.5 transition-transform", statusOpen && "rotate-180")} />
+                <ChevronDown className={cn("w-3 h-3 transition-transform", statusOpen && "rotate-180")} />
               </button>
               {statusOpen && (
-                <div className="absolute top-full left-0 mt-1.5 bg-popover border border-border rounded-xl shadow-xl z-[70] p-1 min-w-[120px]">
+                <div className="absolute top-full right-0 mt-1.5 bg-popover border border-border rounded-xl shadow-xl z-[70] p-1 min-w-[120px]">
                   {statusOptions.map(opt => (
                     <button key={opt.value} type="button"
                       onClick={(e) => { e.stopPropagation(); onStatusChange(opt.value); setStatusOpen(false); }}
@@ -79,16 +82,26 @@ const ProjectCard = ({ project, companyName, index, onClick, onNavigate, showArc
               )}
             </div>
           ) : (
-            <span className={cn('text-[10px] font-medium px-2 py-0.5 rounded-full capitalize', statusColors[project.status])}>{project.status}</span>
+            <span className={cn('text-[11px] font-medium px-2.5 py-1 rounded-full capitalize', statusColors[project.status])}>{project.status}</span>
           )}
         </div>
-        <div className="flex items-center gap-2">
-          {/* Archive checkbox (right side) */}
+
+        {/* Title */}
+        <h3 className="font-semibold text-primary group-hover:text-primary/80 transition-colors text-base mb-1">{project.name}</h3>
+        <p className="text-xs text-muted-foreground mb-4 line-clamp-2">{project.description}</p>
+
+        {/* Priority + Date row + checkbox */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+            <span className={cn('font-medium capitalize', priorityColors[project.priority])}>{project.priority}</span>
+            <span>·</span>
+            <span>{formatDateRange(project.start_date, project.end_date)}</span>
+          </div>
           {showArchiveCheckbox && onArchiveToggle && (
             <button
               onClick={(e) => { e.stopPropagation(); onArchiveToggle(); }}
               className={cn(
-                "w-5 h-5 rounded border-2 flex items-center justify-center transition-colors",
+                "w-5 h-5 rounded border-2 flex items-center justify-center transition-colors flex-shrink-0",
                 isArchived
                   ? 'border-primary bg-primary/20 hover:border-destructive hover:bg-transparent'
                   : 'border-muted-foreground/40 hover:border-primary'
@@ -99,33 +112,22 @@ const ProjectCard = ({ project, companyName, index, onClick, onNavigate, showArc
             </button>
           )}
         </div>
-      </div>
 
-      <div className="mt-1 mb-1">
-        <p className="text-[10px] text-muted-foreground mb-1">{companyName}</p>
-        <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors text-sm">{project.name}</h3>
-      </div>
-
-      <p className="text-xs text-muted-foreground mb-3 line-clamp-2">{project.description}</p>
-
-      <div className="flex items-center gap-3 mb-3 text-[10px] text-muted-foreground">
-        <span className={cn('font-medium capitalize', priorityColors[project.priority])}>{project.priority}</span>
-        <span>·</span>
-        <span>{formatDateRange(project.start_date, project.end_date)}</span>
-      </div>
-
-      <div className="mb-3">
-        <div className="flex justify-between items-center mb-1.5">
-          <span className="text-[11px] text-muted-foreground">Progress</span>
-          <span className="text-[11px] font-medium text-foreground">{progress}%</span>
-        </div>
-        <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-          <motion.div initial={{ width: 0 }} animate={{ width: `${progress}%` }} transition={{ delay: index * 0.08 + 0.3, duration: 0.6 }}
-            className="h-full rounded-full bg-primary" />
+        {/* Progress */}
+        <div>
+          <div className="flex justify-between items-center mb-1.5">
+            <span className="text-[11px] text-muted-foreground">Progress</span>
+            <span className="text-[11px] font-medium text-foreground">{progress}%</span>
+          </div>
+          <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+            <motion.div initial={{ width: 0 }} animate={{ width: `${progress}%` }} transition={{ delay: index * 0.08 + 0.3, duration: 0.6 }}
+              className="h-full rounded-full bg-primary" />
+          </div>
         </div>
       </div>
 
-      <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+      {/* Footer with border-top */}
+      <div className="flex items-center justify-between text-[11px] text-muted-foreground border-t border-border px-5 py-3">
         <div className="flex items-center gap-1.5">
           <CheckCircle2 className="w-3.5 h-3.5" />
           <span>{doneTasks}/{totalTasks} tasks</span>
