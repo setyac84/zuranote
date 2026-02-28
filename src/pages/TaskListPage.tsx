@@ -267,13 +267,25 @@ const TaskListPage = () => {
               <motion.div key={task.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
                 onClick={() => setSelectedTask(task)} className="glass-card rounded-xl p-4 cursor-pointer hover:border-primary/30 transition-all overflow-visible relative">
                 {/* Archive checkbox on Done tab */}
-                {activeTab === 'done' && isAdmin && (
+                {(activeTab === 'done' || activeTab === 'archive') && isAdmin && (
                   <button
-                    onClick={(e) => { e.stopPropagation(); handleArchiveTask(task.id); }}
-                    className="absolute top-3 right-3 w-5 h-5 rounded border-2 border-muted-foreground/40 hover:border-primary flex items-center justify-center transition-colors z-10"
-                    title="Archive this task"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (activeTab === 'archive') {
+                        updateTaskMutation.mutate({ id: task.id, archived: false } as any);
+                      } else {
+                        handleArchiveTask(task.id);
+                      }
+                    }}
+                    className={cn(
+                      "absolute top-3 right-3 w-5 h-5 rounded border-2 flex items-center justify-center transition-colors z-10",
+                      activeTab === 'archive'
+                        ? 'border-primary bg-primary/20 hover:border-destructive hover:bg-transparent'
+                        : 'border-muted-foreground/40 hover:border-primary'
+                    )}
+                    title={activeTab === 'archive' ? 'Unarchive this task' : 'Archive this task'}
                   >
-                    <Check className="w-3 h-3 text-transparent hover:text-primary" />
+                    <Check className={cn('w-3 h-3', activeTab === 'archive' ? 'text-primary' : 'text-transparent hover:text-primary')} />
                   </button>
                 )}
                 <div className="flex items-center justify-between mb-2 pr-6">
