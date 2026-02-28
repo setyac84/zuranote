@@ -26,7 +26,7 @@ const AppLayout = ({ children }: { children: ReactNode }) => {
         <GlobalSearch />
       </div>
       {/* Top bar - mobile (below mobile header) */}
-      <div className="lg:hidden px-4 pt-[60px] pb-2">
+      <div className="lg:hidden flex justify-center px-4 pt-[60px] pb-2">
         <GlobalSearch />
       </div>
       <main className="p-4 pt-2 lg:pt-[72px] lg:pl-56 lg:pr-6">
