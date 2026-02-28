@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle2, ChevronRight, Check, ChevronDown } from 'lucide-react';
+import { CheckCircle2, ChevronRight, Check, ChevronDown, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { formatDateRange } from '@/lib/formatDate';
+import { formatDateRange, formatDaysLeft, daysLeftColor } from '@/lib/formatDate';
 
 const statusColors: Record<string, string> = {
   planning: 'bg-info/15 text-info', ongoing: 'bg-warning/15 text-warning',
@@ -128,9 +128,17 @@ const ProjectCard = ({ project, companyName, index, onClick, onNavigate, showArc
 
       {/* Footer with border-top */}
       <div className="flex items-center justify-between text-[11px] text-muted-foreground border-t border-border px-5 py-3">
-        <div className="flex items-center gap-1.5">
-          <CheckCircle2 className="w-3.5 h-3.5" />
-          <span>{doneTasks}/{totalTasks} tasks</span>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5">
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            <span>{doneTasks}/{totalTasks} tasks</span>
+          </div>
+          {formatDaysLeft(project.end_date) && (
+            <div className={cn('flex items-center gap-1', daysLeftColor(project.end_date))}>
+              <Clock className="w-3 h-3" />
+              <span className="font-medium">{formatDaysLeft(project.end_date)}</span>
+            </div>
+          )}
         </div>
         {onNavigate && (
           <button onClick={(e) => { e.stopPropagation(); onNavigate(); }}

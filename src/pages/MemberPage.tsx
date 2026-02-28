@@ -164,7 +164,7 @@ const MemberPage = () => {
             {isSuperAdmin ? 'All members' : `${activeDivision} division members`}
           </p>
         </div>
-        {isSuperAdmin && (
+        {isAdmin && (
           <button onClick={() => setShowAddDialog(true)}
             className="flex items-center gap-1.5 px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">
             <UserPlus className="w-4 h-4" /> Add Member
@@ -204,7 +204,7 @@ const MemberPage = () => {
                     <Pencil className="w-3.5 h-3.5" />
                   </button>
                 )}
-                {isSuperAdmin && member.id !== user.id && (
+                {isAdmin && member.id !== user.id && member.role !== 'super_admin' && (
                   <>
                     <button onClick={() => setResetPasswordId(member.id)} title="Reset Password"
                       className="p-1.5 rounded-md hover:bg-secondary transition-colors text-muted-foreground hover:text-foreground">
@@ -257,7 +257,7 @@ const MemberPage = () => {
               <div>
                 <label className="text-xs font-medium text-muted-foreground mb-1 block">Role</label>
                 <StyledDropdown value={addForm.role || 'member'} onChange={(v) => setAddForm((f: any) => ({ ...f, role: v }))}
-                  options={roleOptions.map(r => ({ value: r, label: r === 'super_admin' ? 'Super Admin' : r === 'admin' ? 'Admin' : 'Member' }))} />
+                  options={isSuperAdmin ? roleOptions.map(r => ({ value: r, label: r === 'super_admin' ? 'Super Admin' : r === 'admin' ? 'Admin' : 'Member' })) : [{ value: 'member', label: 'Member' }]} />
               </div>
               <div className="col-span-2">
                 <label className="text-xs font-medium text-muted-foreground mb-1 block">Division</label>

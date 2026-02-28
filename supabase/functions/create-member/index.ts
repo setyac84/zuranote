@@ -33,8 +33,9 @@ Deno.serve(async (req) => {
       .eq("user_id", caller.id)
       .single();
 
-    if (roleData?.role !== "super_admin") {
-      return new Response(JSON.stringify({ error: "Forbidden: super_admin only" }), {
+    // Allow admin and super_admin
+    if (roleData?.role !== "super_admin" && roleData?.role !== "admin") {
+      return new Response(JSON.stringify({ error: "Forbidden: admin or above only" }), {
         status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -62,6 +63,13 @@ Deno.serve(async (req) => {
     const targetCompanyId = callerCompanyId === null
       ? (company_id || null)
       : callerCompanyId;
+
+    // Admin (non-super) can only create members, not other admins/super_admins
+    if (roleData?.role === "admin" && role && role !== "member") {
+      return new Response(JSON.stringify({ error: "Admin can only create members" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // Create user via admin API
     const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
