@@ -72,10 +72,12 @@ const TaskListPage = () => {
       filtered = filtered.filter(t => priorities.includes(t.priority));
     }
     if (projectFilter) filtered = filtered.filter(t => t.project_id === projectFilter);
+    const statusOrder: Record<string, number> = { todo: 0, doing: 1, review: 2, done: 3 };
     filtered.sort((a, b) => {
-      if (!a.due_date) return 1;
-      if (!b.due_date) return -1;
-      return new Date(b.due_date).getTime() - new Date(a.due_date).getTime();
+      const da = a.due_date ? new Date(a.due_date).getTime() : Infinity;
+      const db = b.due_date ? new Date(b.due_date).getTime() : Infinity;
+      if (da !== db) return da - db;
+      return (statusOrder[a.status] ?? 4) - (statusOrder[b.status] ?? 4);
     });
     return filtered;
   }, [allTasks, allProjects, activeDivision, isAdmin, user, statusFilter, memberFilter, priorityFilter, projectFilter]);
