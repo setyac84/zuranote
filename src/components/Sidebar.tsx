@@ -17,6 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useUpdateProfile } from '@/hooks/useSupabaseData';
 import { toast } from 'sonner';
+import AvatarUpload from '@/components/AvatarUpload';
 
 const Sidebar = () => {
   const { user, logout, activeDivision, setActiveDivision, isSuperAdmin, isAdmin, refreshProfile } = useAuth();
@@ -139,9 +140,7 @@ const Sidebar = () => {
 
       <div className="p-3 border-t border-sidebar-border space-y-2">
         <button onClick={() => setProfileOpen(true)} className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-sidebar-accent/50 transition-colors cursor-pointer text-left">
-          <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-semibold text-primary shrink-0">
-            {user.name.split(' ').map(n => n[0]).join('')}
-          </div>
+          <AvatarUpload userId={user.id} currentAvatar={user.avatar} name={user.name} size="sm" editable={false} />
           <div className="flex-1 min-w-0">
             <p className="text-xs font-medium text-foreground truncate">{user.name}</p>
             <p className="text-[10px] text-muted-foreground capitalize">{user.role === 'super_admin' ? 'Super Admin' : user.role}</p>
@@ -187,9 +186,7 @@ const Sidebar = () => {
             <DialogDescription>Update your name and position.</DialogDescription>
           </DialogHeader>
           <div className="flex flex-col items-center gap-4 pt-2">
-            <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center text-xl font-bold text-primary">
-              {profileName.split(' ').map(n => n[0]).join('')}
-            </div>
+            <AvatarUpload userId={user.id} currentAvatar={user.avatar} name={profileName} size="lg" onUploaded={async () => { await refreshProfile(); }} />
             <div className="w-full space-y-3">
               <div>
                 <Label htmlFor="profile-name" className="text-xs">Name</Label>
