@@ -35,11 +35,26 @@ const MemberPage = () => {
 
   if (!user) return null;
 
-  const visibleMembers = isSuperAdmin
+  const roleOrder: Record<string, number> = { super_admin: 0, admin: 1, member: 2 };
+  const divisionOrder: Record<string, number> = { management: 0, creative: 1, developer: 2 };
+
+  const visibleMembers = (isSuperAdmin
     ? allMembers
     : isAdmin
       ? allMembers.filter(u => u.division === activeDivision && u.role !== 'super_admin')
-      : allMembers.filter(u => u.division === user.division);
+      : allMembers.filter(u => u.division === user.division)
+  ).slice().sort((a, b) => {
+    // 1. Role
+    const rDiff = (roleOrder[a.role] ?? 9) - (roleOrder[b.role] ?? 9);
+    if (rDiff !== 0) return rDiff;
+    // 2. Company
+    const aCompany = companies.find(c => c.id === a.company_id)?.name || '';
+    const bCompany = companies.find(c => c.id === b.company_id)?.name || '';
+    const cDiff = aCompany.localeCompare(bCompany);
+    if (cDiff !== 0) return cDiff;
+    // 3. Division
+    return (divisionOrder[a.division] ?? 9) - (divisionOrder[b.division] ?? 9);
+  });
 
   const inputCls = 'bg-secondary/50 border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary';
 
