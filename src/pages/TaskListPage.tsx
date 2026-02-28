@@ -178,7 +178,7 @@ const TaskListPage = () => {
       return (statusOrder[a.status] ?? 4) - (statusOrder[b.status] ?? 4);
     });
     return filtered;
-  }, [allTasks, allProjects, activeDivision, isAdmin, user, memberFilter, priorityFilter, statusFilter, projectFilter, activeTab, allTaskAssignees]);
+  }, [allTasks, allProjects, activeDivision, isAdmin, user, memberFilter, priorityFilter, statusFilter, projectFilter, assigneeFilter, activeTab, allTaskAssignees]);
 
 const AssigneeFilterDropdown = ({ members, value, onChange }: { members: { id: string; name: string }[]; value: string; onChange: (v: string) => void }) => {
   const [open, setOpen] = useState(false);
