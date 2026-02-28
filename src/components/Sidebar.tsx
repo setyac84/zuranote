@@ -2,21 +2,42 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   LayoutDashboard, FolderKanban, LogOut, Palette, Code2,
-  Building2, ListTodo, Users, Menu, X, PlusCircle,
+  Building2, ListTodo, Users, Menu, X, PlusCircle, Moon, Sun,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Division } from '@/types';
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useTheme } from 'next-themes';
 import logoImg from '@/assets/logo.png';
+import { Switch } from '@/components/ui/switch';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useUpdateProfile } from '@/hooks/useSupabaseData';
+import { toast } from 'sonner';
 
 const Sidebar = () => {
-  const { user, logout, activeDivision, setActiveDivision, isSuperAdmin, isAdmin } = useAuth();
+  const { user, logout, activeDivision, setActiveDivision, isSuperAdmin, isAdmin, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { theme, setTheme } = useTheme();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [profileName, setProfileName] = useState('');
+  const [profilePosition, setProfilePosition] = useState('');
+  const [saving, setSaving] = useState(false);
+  const updateProfile = useUpdateProfile();
 
   useEffect(() => { setMobileOpen(false); }, [location.pathname]);
+
+  useEffect(() => {
+    if (user && profileOpen) {
+      setProfileName(user.name);
+      setProfilePosition(user.position || '');
+    }
+  }, [profileOpen, user]);
 
   if (!user) return null;
 
@@ -43,7 +64,23 @@ const Sidebar = () => {
     navigate('/');
   };
 
+  const handleSaveProfile = async () => {
+    if (!profileName.trim()) return;
+    setSaving(true);
+    try {
+      await updateProfile.mutateAsync({ id: user.id, name: profileName.trim(), position: profilePosition.trim() || undefined });
+      await refreshProfile();
+      setProfileOpen(false);
+      toast.success('Profile updated');
+    } catch (e: any) {
+      toast.error(e.message || 'Failed to update profile');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const canSwitchDivision = isSuperAdmin;
+  const isDark = theme === 'dark';
 
   const sidebarContent = (
     <>
@@ -89,8 +126,19 @@ const Sidebar = () => {
         </div>
       </nav>
 
+      {/* Dark mode toggle */}
+      <div className="px-3 pb-2">
+        <div className="flex items-center justify-between px-2.5 py-2">
+          <div className="flex items-center gap-2 text-sm text-sidebar-foreground">
+            {isDark ? <Moon className="w-4 h-4 shrink-0" /> : <Sun className="w-4 h-4 shrink-0" />}
+            <span>{isDark ? 'Dark' : 'Light'}</span>
+          </div>
+          <Switch checked={isDark} onCheckedChange={(checked) => setTheme(checked ? 'dark' : 'light')} className="scale-90" />
+        </div>
+      </div>
+
       <div className="p-3 border-t border-sidebar-border space-y-2">
-        <div className="flex items-center gap-2.5 px-2 py-1.5">
+        <button onClick={() => setProfileOpen(true)} className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-sidebar-accent/50 transition-colors cursor-pointer text-left">
           <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center text-[10px] font-semibold text-primary shrink-0">
             {user.name.split(' ').map(n => n[0]).join('')}
           </div>
@@ -98,7 +146,7 @@ const Sidebar = () => {
             <p className="text-xs font-medium text-foreground truncate">{user.name}</p>
             <p className="text-[10px] text-muted-foreground capitalize">{user.role === 'super_admin' ? 'Super Admin' : user.role}</p>
           </div>
-        </div>
+        </button>
         <button onClick={handleLogout}
           className="w-full flex items-center gap-2 rounded-lg text-sm text-sidebar-foreground hover:bg-destructive/10 hover:text-destructive transition-colors px-2.5 py-1.5">
           <LogOut className="w-4 h-4 shrink-0" /> Logout
@@ -130,6 +178,34 @@ const Sidebar = () => {
       )}>
         {sidebarContent}
       </aside>
+
+      {/* Profile Edit Dialog */}
+      <Dialog open={profileOpen} onOpenChange={setProfileOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Edit Profile</DialogTitle>
+            <DialogDescription>Update your name and position.</DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center gap-4 pt-2">
+            <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center text-xl font-bold text-primary">
+              {profileName.split(' ').map(n => n[0]).join('')}
+            </div>
+            <div className="w-full space-y-3">
+              <div>
+                <Label htmlFor="profile-name" className="text-xs">Name</Label>
+                <Input id="profile-name" value={profileName} onChange={e => setProfileName(e.target.value)} className="mt-1" />
+              </div>
+              <div>
+                <Label htmlFor="profile-position" className="text-xs">Position</Label>
+                <Input id="profile-position" value={profilePosition} onChange={e => setProfilePosition(e.target.value)} placeholder="e.g. Designer, Developer" className="mt-1" />
+              </div>
+            </div>
+            <Button onClick={handleSaveProfile} disabled={saving || !profileName.trim()} className="w-full">
+              {saving ? 'Saving...' : 'Save Changes'}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
