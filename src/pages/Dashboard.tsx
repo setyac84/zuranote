@@ -132,19 +132,20 @@ const Dashboard = () => {
           <div className="grid grid-cols-2 gap-3 sm:gap-4">
             {stats.map((stat, i) => (
               <motion.div key={stat.label} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
-                className="glass-card rounded-xl p-4 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className={cn('w-7 h-7 rounded-lg flex items-center justify-center', stat.bgColor)}>
+                className="glass-card rounded-xl overflow-hidden flex flex-col">
+                <div className="p-4 flex-1">
+                  <div className="flex items-center gap-2.5 mb-3">
+                    <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center', stat.bgColor)}>
                       <stat.icon className={cn('w-4 h-4', stat.color)} />
                     </div>
-                    <span className="text-xs text-muted-foreground font-medium">{stat.label}</span>
+                    <span className="text-xs text-muted-foreground font-medium leading-tight">{stat.label}</span>
                   </div>
-                  <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+                  <p className="text-3xl font-bold text-foreground">{stat.value}</p>
                 </div>
                 <button onClick={stat.onClick}
-                  className="mt-3 w-full text-[11px] text-muted-foreground font-medium py-1.5 rounded-lg border border-border hover:bg-secondary/50 hover:text-foreground transition-colors">
-                  View all →
+                  className="flex items-center justify-between w-full px-4 py-2.5 text-xs text-muted-foreground font-medium border-t border-border hover:bg-secondary/50 hover:text-foreground transition-colors">
+                  <span>View all</span>
+                  <ChevronDown className="w-3.5 h-3.5 -rotate-90" />
                 </button>
               </motion.div>
             ))}
