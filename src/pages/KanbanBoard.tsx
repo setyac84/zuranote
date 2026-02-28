@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useProjects, useTasks, useMembers, useUpdateTask, useDeleteTask } from '@/hooks/useSupabaseData';
+import { useProjects, useTasks, useMembers, useUpdateTask, useDeleteTask, useTaskAssignees } from '@/hooks/useSupabaseData';
 import TaskModal from '@/components/TaskModal';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -30,6 +30,7 @@ const KanbanBoard = () => {
   const { data: allProjects = [] } = useProjects();
   const { data: allTasks = [] } = useTasks();
   const { data: allMembers = [] } = useMembers();
+  const { data: allTaskAssignees = [] } = useTaskAssignees();
   const updateTask = useUpdateTask();
   const deleteTask = useDeleteTask();
 
@@ -40,9 +41,14 @@ const KanbanBoard = () => {
       return project?.division === activeDivision;
     });
     if (projectFilter) filtered = filtered.filter(t => t.project_id === projectFilter);
-    if (!isAdmin) filtered = filtered.filter(t => t.assignee_id === user.id);
+    if (!isAdmin) {
+      filtered = filtered.filter(t => {
+        const taskAssigneeIds = allTaskAssignees.filter(ta => ta.task_id === t.id).map(ta => ta.assignee_id);
+        return taskAssigneeIds.includes(user.id) || t.assignee_id === user.id;
+      });
+    }
     return filtered;
-  }, [allTasks, allProjects, activeDivision, projectFilter, isAdmin, user]);
+  }, [allTasks, allProjects, activeDivision, projectFilter, isAdmin, user, allTaskAssignees]);
 
   if (!user) return null;
 
@@ -81,7 +87,10 @@ const KanbanBoard = () => {
               </div>
               <div className="space-y-2">
                 {colTasks.map(task => {
-                  const assignee = allMembers.find(u => u.id === task.assignee_id);
+                  const taskAssigneeIds = allTaskAssignees.filter(ta => ta.task_id === task.id).map(ta => ta.assignee_id);
+                  const assignees = taskAssigneeIds.length > 0
+                    ? taskAssigneeIds.map(id => allMembers.find(u => u.id === id)).filter(Boolean)
+                    : (task.assignee_id ? [allMembers.find(u => u.id === task.assignee_id)].filter(Boolean) : []);
                   return (
                     <motion.div key={task.id} layout onClick={() => setSelectedTask(task)}
                       className="bg-card border border-border/60 rounded-lg p-3 cursor-pointer hover:border-primary/30 transition-all shadow-sm">
@@ -90,12 +99,18 @@ const KanbanBoard = () => {
                         <span className="text-[10px] text-muted-foreground capitalize">{task.priority}</span>
                       </div>
                       <h4 className="text-sm font-medium text-foreground mb-1 line-clamp-2">{task.title}</h4>
-                      {assignee && (
-                        <div className="flex items-center gap-1.5 mt-2">
-                          <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-[8px] font-bold text-primary">
-                            {assignee.name.split(' ').map((n: string) => n[0]).join('')}
+                      {assignees.length > 0 && (
+                        <div className="flex items-center gap-1 mt-2">
+                          <div className="flex -space-x-1.5">
+                            {assignees.slice(0, 3).map((a: any) => (
+                              <div key={a.id} className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-[8px] font-bold text-primary border border-card">
+                                {a.name.split(' ').map((n: string) => n[0]).join('')}
+                              </div>
+                            ))}
                           </div>
-                          <span className="text-[10px] text-muted-foreground">{assignee.name.split(' ')[0]}</span>
+                          <span className="text-[10px] text-muted-foreground ml-1">
+                            {assignees.length <= 2 ? assignees.map((a: any) => a.name.split(' ')[0]).join(', ') : `${assignees.length} assignees`}
+                          </span>
                         </div>
                       )}
                     </motion.div>

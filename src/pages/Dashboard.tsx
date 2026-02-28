@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useProjects, useTasks, useMembers, useCompanies, useCreateProject, useCreateTask, useUpdateTask, useDeleteTask, useUpdateProfile, useUpdateUserRole } from '@/hooks/useSupabaseData';
+import { useProjects, useTasks, useMembers, useCompanies, useCreateProject, useCreateTask, useUpdateTask, useDeleteTask, useUpdateProfile, useUpdateUserRole, useTaskAssignees } from '@/hooks/useSupabaseData';
 import { formatDate } from '@/lib/formatDate';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
@@ -55,6 +55,7 @@ const Dashboard = () => {
   const { data: allTasks = [] } = useTasks();
   const { data: allMembers = [] } = useMembers();
   const { data: companies = [] } = useCompanies();
+  const { data: allTaskAssignees = [] } = useTaskAssignees();
   const updateTaskMutation = useUpdateTask();
   const deleteTaskMutation = useDeleteTask();
 
@@ -70,7 +71,10 @@ const Dashboard = () => {
     return project?.division === activeDivision;
   });
 
-  const myTasks = isAdmin ? divisionTasks : divisionTasks.filter((t) => t.assignee_id === user.id);
+  const myTasks = isAdmin ? divisionTasks : divisionTasks.filter((t) => {
+    const taIds = allTaskAssignees.filter(ta => ta.task_id === t.id).map(ta => ta.assignee_id);
+    return taIds.includes(user.id) || t.assignee_id === user.id;
+  });
   const todoCount = myTasks.filter((t) => t.status === 'todo').length;
   const doingCount = myTasks.filter((t) => t.status === 'doing').length;
   const doneCount = myTasks.filter((t) => t.status === 'done').length;
@@ -163,7 +167,10 @@ const Dashboard = () => {
               </div>
               <div className="space-y-2">
                 {divisionMembers.map((member) => {
-                const memberTasks = divisionTasks.filter((t) => t.assignee_id === member.id);
+                const memberTasks = divisionTasks.filter((t) => {
+                  const taIds = allTaskAssignees.filter(ta => ta.task_id === t.id).map(ta => ta.assignee_id);
+                  return taIds.includes(member.id) || t.assignee_id === member.id;
+                });
                 const memberDone = memberTasks.filter((t) => t.status === 'done').length;
                 const memberPending = memberTasks.filter((t) => t.status !== 'done').length;
                 return (
@@ -205,7 +212,10 @@ const Dashboard = () => {
 
             <div className="space-y-0 divide-y divide-border/50">
                 {todayTasks.map((task) => {
-                const assignee = allMembers.find((u) => u.id === task.assignee_id);
+                const taskAssigneeIds = allTaskAssignees.filter(ta => ta.task_id === task.id).map(ta => ta.assignee_id);
+                const assignees = taskAssigneeIds.length > 0
+                  ? taskAssigneeIds.map(id => allMembers.find(u => u.id === id)).filter(Boolean)
+                  : (task.assignee_id ? [allMembers.find(u => u.id === task.assignee_id)].filter(Boolean) : []);
                 const { projectName, companyName } = getProjectCompany(task.project_id);
                 return (
                   <div key={task.id} onClick={() => setSelectedTask(task)} className="py-3 hover:bg-secondary/30 cursor-pointer transition-colors">
@@ -217,14 +227,20 @@ const Dashboard = () => {
                       <p className="text-xs text-muted-foreground mb-2 line-clamp-1">{task.description}</p>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          {assignee &&
-                        <div className="flex items-center gap-1.5">
-                              <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-[9px] font-semibold text-primary">
-                                {assignee.name.split(' ').map((n: string) => n[0]).join('')}
+                          {assignees.length > 0 && (
+                            <div className="flex items-center gap-1.5">
+                              <div className="flex -space-x-1.5">
+                                {assignees.slice(0, 3).map((a: any) => (
+                                  <div key={a.id} className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-[9px] font-semibold text-primary border border-card">
+                                    {a.name.split(' ').map((n: string) => n[0]).join('')}
+                                  </div>
+                                ))}
                               </div>
-                              <span className="text-[11px] text-muted-foreground">{assignee.name.split(' ')[0]}</span>
+                              <span className="text-[11px] text-muted-foreground">
+                                {assignees.length <= 2 ? assignees.map((a: any) => a.name.split(' ')[0]).join(', ') : `${assignees.length} assignees`}
+                              </span>
                             </div>
-                        }
+                          )}
                         </div>
                         <InlineStatusDropdown value={task.status as TaskStatus} onChange={(s) => handleStatusChange(task.id, s)} />
                       </div>
@@ -253,7 +269,10 @@ const Dashboard = () => {
 
             <div className="space-y-0 divide-y divide-border/50">
                   {highPriorityTasks.map((task) => {
-                const assignee = allMembers.find((u) => u.id === task.assignee_id);
+                const taskAssigneeIds = allTaskAssignees.filter(ta => ta.task_id === task.id).map(ta => ta.assignee_id);
+                const assignees = taskAssigneeIds.length > 0
+                  ? taskAssigneeIds.map(id => allMembers.find(u => u.id === id)).filter(Boolean)
+                  : (task.assignee_id ? [allMembers.find(u => u.id === task.assignee_id)].filter(Boolean) : []);
                 const { projectName, companyName } = getProjectCompany(task.project_id);
                 return (
                   <div key={task.id} onClick={() => setSelectedTask(task)} className="py-3 hover:bg-secondary/30 cursor-pointer transition-colors">
@@ -265,14 +284,20 @@ const Dashboard = () => {
                         <p className="text-xs text-muted-foreground mb-2 line-clamp-1">{task.description}</p>
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            {assignee &&
-                        <div className="flex items-center gap-1.5">
-                                <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-[9px] font-semibold text-primary">
-                                  {assignee.name.split(' ').map((n: string) => n[0]).join('')}
+                            {assignees.length > 0 && (
+                              <div className="flex items-center gap-1.5">
+                                <div className="flex -space-x-1.5">
+                                  {assignees.slice(0, 3).map((a: any) => (
+                                    <div key={a.id} className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-[9px] font-semibold text-primary border border-card">
+                                      {a.name.split(' ').map((n: string) => n[0]).join('')}
+                                    </div>
+                                  ))}
                                 </div>
-                                <span className="text-[11px] text-muted-foreground">{assignee.name.split(' ')[0]}</span>
+                                <span className="text-[11px] text-muted-foreground">
+                                  {assignees.length <= 2 ? assignees.map((a: any) => a.name.split(' ')[0]).join(', ') : `${assignees.length} assignees`}
+                                </span>
                               </div>
-                        }
+                            )}
                             <span className="text-[10px] text-muted-foreground">· {formatDate(task.due_date)}</span>
                           </div>
                           <InlineStatusDropdown value={task.status as TaskStatus} onChange={(s) => handleStatusChange(task.id, s)} />

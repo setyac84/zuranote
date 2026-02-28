@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { useProjects, useMembers, useCompanies, useCreateTask, useUpdateTask } from '@/hooks/useSupabaseData';
+import { useProjects, useMembers, useCompanies, useCreateTask, useUpdateTask, useTaskAssignees, useSetTaskAssignees } from '@/hooks/useSupabaseData';
 import { supabase } from '@/integrations/supabase/client';
-import { X, Calendar as CalendarIcon, Flag, User, Link, AlertTriangle, Trash2, ChevronDown, Save, Pencil, Image } from 'lucide-react';
+import { X, Calendar as CalendarIcon, Flag, User, Link, AlertTriangle, Trash2, ChevronDown, Save, Pencil, Image, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/formatDate';
@@ -49,15 +49,72 @@ const ModalDropdown = <T extends string>({ value, onChange, options, placeholder
       {open && (
         <>
           <div className="fixed inset-0 z-[60]" onClick={() => setOpen(false)} />
-          <div className="absolute top-full left-0 right-0 mt-1.5 bg-popover border border-border rounded-2xl shadow-xl z-[70] p-1.5 max-h-[220px] overflow-y-auto">
+          <div className="absolute top-full left-0 right-0 mt-1.5 bg-popover border border-border rounded-2xl shadow-xl z-[70] p-1.5 max-h-[220px] overflow-y-auto space-y-0.5">
             {options.map(opt => (
               <button key={opt.value} type="button" onClick={() => { onChange(opt.value); setOpen(false); }}
-                className={cn('w-full text-left px-3 py-2.5 text-sm rounded-xl transition-colors', value === opt.value ? 'font-medium bg-accent text-accent-foreground' : 'text-foreground hover:bg-accent/60 hover:text-accent-foreground')}>
+                className={cn('w-full text-left px-3 py-2 text-sm rounded-xl transition-colors', value === opt.value ? 'font-medium bg-accent text-accent-foreground' : 'text-foreground hover:bg-accent/60 hover:text-accent-foreground')}>
                 {opt.label}
               </button>
             ))}
           </div>
         </>
+      )}
+    </div>
+  );
+};
+
+// Multi-select assignee dropdown
+const MultiAssigneeSelect = ({ selected, onChange, options }: {
+  selected: string[]; onChange: (ids: string[]) => void; options: { value: string; label: string }[];
+}) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    if (open) document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  const toggleAssignee = (id: string) => {
+    if (selected.includes(id)) {
+      onChange(selected.filter(s => s !== id));
+    } else {
+      onChange([...selected, id]);
+    }
+  };
+
+  const selectedLabels = selected.map(id => options.find(o => o.value === id)?.label).filter(Boolean);
+
+  return (
+    <div className="relative" ref={ref}>
+      <button type="button" onClick={() => setOpen(!open)}
+        className="flex items-center justify-between w-full bg-secondary/50 border border-border rounded-xl px-3 py-2 text-sm text-foreground hover:border-primary/40 transition-colors min-h-[40px]">
+        <div className="flex flex-wrap gap-1 flex-1">
+          {selectedLabels.length > 0 ? selectedLabels.map((name, i) => (
+            <span key={i} className="bg-primary/15 text-primary text-xs font-medium px-2 py-0.5 rounded-md">{name}</span>
+          )) : (
+            <span className="text-muted-foreground">Select assignees...</span>
+          )}
+        </div>
+        <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform ml-2 shrink-0", open && "rotate-180")} />
+      </button>
+      {open && (
+        <div className="absolute top-full left-0 right-0 mt-1.5 bg-popover border border-border rounded-2xl shadow-xl z-[70] p-1.5 max-h-[220px] overflow-y-auto space-y-0.5">
+          {options.map(opt => (
+            <button key={opt.value} type="button" onClick={() => toggleAssignee(opt.value)}
+              className={cn('w-full flex items-center gap-2.5 px-3 py-2 text-sm rounded-xl transition-colors',
+                selected.includes(opt.value) ? 'font-medium bg-accent text-accent-foreground' : 'text-foreground hover:bg-accent/60 hover:text-accent-foreground')}>
+              <div className={cn('w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-colors',
+                selected.includes(opt.value) ? 'border-primary bg-primary' : 'border-muted-foreground/40')}>
+                {selected.includes(opt.value) && <Check className="w-3 h-3 text-primary-foreground" />}
+              </div>
+              {opt.label}
+            </button>
+          ))}
+        </div>
       )}
     </div>
   );
@@ -181,11 +238,14 @@ const TaskModal = ({ task, division, isOpen, onClose, onDelete, readOnly, mode: 
   const { data: allProjects = [] } = useProjects();
   const { data: allMembers = [] } = useMembers();
   const { data: companies = [] } = useCompanies();
+  const { data: allTaskAssignees = [] } = useTaskAssignees();
   const createTask = useCreateTask();
   const updateTask = useUpdateTask();
+  const setTaskAssignees = useSetTaskAssignees();
 
   const [mode, setMode] = useState<'view' | 'edit' | 'create'>(initialMode);
   const [form, setForm] = useState<any>({});
+  const [selectedAssignees, setSelectedAssignees] = useState<string[]>([]);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const isCreate = initialMode === 'create';
@@ -199,11 +259,14 @@ const TaskModal = ({ task, division, isOpen, onClose, onDelete, readOnly, mode: 
     if (isCreate) {
       setForm({
         title: '', description: '', status: 'todo', priority: 'medium',
-        assignee_id: divisionMembers[0]?.id || '', project_id: projectId || divisionProjects[0]?.id || '',
+        assignee_id: '', project_id: projectId || divisionProjects[0]?.id || '',
         request_date: new Date().toISOString().split('T')[0], due_date: '',
       });
+      setSelectedAssignees([]);
     } else if (task) {
       setForm({ ...task });
+      const taskAssigneeIds = allTaskAssignees.filter(ta => ta.task_id === task.id).map(ta => ta.assignee_id);
+      setSelectedAssignees(taskAssigneeIds.length > 0 ? taskAssigneeIds : (task.assignee_id ? [task.assignee_id] : []));
     }
   }, [task, initialMode, isOpen]);
 
@@ -225,18 +288,23 @@ const TaskModal = ({ task, division, isOpen, onClose, onDelete, readOnly, mode: 
   const handleSave = async () => {
     if (!form.title?.trim()) return;
     if (isCreate) {
-      await createTask.mutateAsync({
+      const result = await createTask.mutateAsync({
         title: form.title, description: form.description || '', project_id: form.project_id || projectId || '',
-        assignee_id: form.assignee_id || undefined, status: form.status, priority: form.priority,
+        assignee_id: selectedAssignees[0] || undefined, status: form.status, priority: form.priority,
         request_date: form.request_date, due_date: form.due_date || undefined,
         moodboard_link: form.moodboard_link, aspect_ratio: form.aspect_ratio, brand_guidelines: form.brand_guidelines,
         result_link: form.result_link, content_asset_link: form.content_asset_link,
         repo_link: form.repo_link, environment: form.environment, bug_severity: form.bug_severity,
       });
+      if (result?.id) {
+        await setTaskAssignees.mutateAsync({ taskId: result.id, assigneeIds: selectedAssignees });
+      }
       onClose();
     } else {
       const { id, created_at, updated_at, ...updates } = form;
+      updates.assignee_id = selectedAssignees[0] || null;
       await updateTask.mutateAsync({ id: task.id, ...updates });
+      await setTaskAssignees.mutateAsync({ taskId: task.id, assigneeIds: selectedAssignees });
       setMode('view');
     }
   };
@@ -270,7 +338,7 @@ const TaskModal = ({ task, division, isOpen, onClose, onDelete, readOnly, mode: 
     return { value: p.id, label: company ? `${p.name} · ${company.name}` : p.name };
   });
   const assigneeOptions = divisionMembers.map(m => ({ value: m.id, label: m.name }));
-  const assignee = allMembers.find(u => u.id === form.assignee_id);
+  const selectedAssigneeNames = selectedAssignees.map(id => allMembers.find(u => u.id === id)).filter(Boolean);
 
   // Creative fields (excluding result_link which is handled separately)
   const creativeTextFields = ['content_asset_link', 'moodboard_link', 'brand_guidelines', 'aspect_ratio'];
@@ -314,9 +382,24 @@ const TaskModal = ({ task, division, isOpen, onClose, onDelete, readOnly, mode: 
                   <div>
                     <label className={labelCls}>Assignee</label>
                     {isEditable ? (
-                      <ModalDropdown value={form.assignee_id || ''} onChange={(v) => setForm((f: any) => ({ ...f, assignee_id: v }))} options={assigneeOptions} placeholder="Select Assignee" />
+                      <MultiAssigneeSelect
+                        selected={selectedAssignees}
+                        onChange={setSelectedAssignees}
+                        options={assigneeOptions}
+                      />
                     ) : (
-                      <div className="flex items-center gap-2"><User className="w-4 h-4 text-muted-foreground" /><p className="text-sm text-foreground">{assignee?.name || 'Unassigned'}</p></div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {selectedAssigneeNames.length > 0 ? selectedAssigneeNames.map((a: any) => (
+                          <div key={a.id} className="flex items-center gap-1.5 bg-secondary/50 rounded-full px-2 py-1">
+                            <div className="w-4 h-4 rounded-full bg-primary/20 flex items-center justify-center text-[7px] font-bold text-primary">
+                              {a.name.split(' ').map((n: string) => n[0]).join('')}
+                            </div>
+                            <span className="text-xs text-foreground">{a.name.split(' ')[0]}</span>
+                          </div>
+                        )) : (
+                          <div className="flex items-center gap-2"><User className="w-4 h-4 text-muted-foreground" /><p className="text-sm text-foreground">Unassigned</p></div>
+                        )}
+                      </div>
                     )}
                   </div>
                   <div>

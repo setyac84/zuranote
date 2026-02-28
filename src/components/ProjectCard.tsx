@@ -69,11 +69,11 @@ const ProjectCard = ({ project, companyName, index, onClick, onNavigate, showArc
                 <ChevronDown className={cn("w-3 h-3 transition-transform", statusOpen && "rotate-180")} />
               </button>
               {statusOpen && (
-                <div className="absolute top-full right-0 mt-1.5 bg-popover border border-border rounded-xl shadow-xl z-[70] p-1 min-w-[120px]">
+                <div className="absolute top-full right-0 mt-1.5 bg-popover border border-border rounded-xl shadow-xl z-[70] p-1.5 min-w-[120px] space-y-0.5">
                   {statusOptions.map(opt => (
                     <button key={opt.value} type="button"
                       onClick={(e) => { e.stopPropagation(); onStatusChange(opt.value); setStatusOpen(false); }}
-                      className={cn('w-full text-left px-2.5 py-1.5 text-[11px] rounded-lg transition-colors capitalize',
+                      className={cn('w-full text-left px-2.5 py-2 text-[11px] rounded-lg transition-colors capitalize',
                         project.status === opt.value ? 'font-medium bg-accent text-accent-foreground' : 'text-foreground hover:bg-accent/60')}>
                       {opt.label}
                     </button>

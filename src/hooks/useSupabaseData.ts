@@ -111,6 +111,35 @@ export function useTasks() {
   });
 }
 
+// ─── Task Assignees ───
+export function useTaskAssignees() {
+  return useQuery({
+    queryKey: ['task_assignees'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('task_assignees').select('*');
+      if (error) throw error;
+      return data || [];
+    },
+  });
+}
+
+export function useSetTaskAssignees() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ taskId, assigneeIds }: { taskId: string; assigneeIds: string[] }) => {
+      // Delete existing assignees for this task
+      await supabase.from('task_assignees').delete().eq('task_id', taskId);
+      // Insert new assignees
+      if (assigneeIds.length > 0) {
+        const rows = assigneeIds.map(aid => ({ task_id: taskId, assignee_id: aid }));
+        const { error } = await supabase.from('task_assignees').insert(rows);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['task_assignees'] }),
+  });
+}
+
 export function useCreateTask() {
   const qc = useQueryClient();
   return useMutation({

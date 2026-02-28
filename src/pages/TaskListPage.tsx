@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useProjects, useTasks, useMembers, useCompanies, useUpdateTask, useDeleteTask } from '@/hooks/useSupabaseData';
+import { useProjects, useTasks, useMembers, useCompanies, useUpdateTask, useDeleteTask, useTaskAssignees } from '@/hooks/useSupabaseData';
 import TaskModal from '@/components/TaskModal';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -82,6 +82,7 @@ const TaskListPage = () => {
   const { data: allTasks = [] } = useTasks();
   const { data: allMembers = [] } = useMembers();
   const { data: companies = [] } = useCompanies();
+  const { data: allTaskAssignees = [] } = useTaskAssignees();
   const updateTaskMutation = useUpdateTask();
   const deleteTaskMutation = useDeleteTask();
 
@@ -110,8 +111,18 @@ const TaskListPage = () => {
       const project = allProjects.find(p => p.id === t.project_id);
       return project?.division === activeDivision;
     });
-    if (!isAdmin) filtered = filtered.filter(t => t.assignee_id === user.id);
-    if (memberFilter) filtered = filtered.filter(t => t.assignee_id === memberFilter);
+    if (!isAdmin) {
+      filtered = filtered.filter(t => {
+        const taskAssigneeIds = allTaskAssignees.filter(ta => ta.task_id === t.id).map(ta => ta.assignee_id);
+        return taskAssigneeIds.includes(user.id) || t.assignee_id === user.id;
+      });
+    }
+    if (memberFilter) {
+      filtered = filtered.filter(t => {
+        const taskAssigneeIds = allTaskAssignees.filter(ta => ta.task_id === t.id).map(ta => ta.assignee_id);
+        return taskAssigneeIds.includes(memberFilter) || t.assignee_id === memberFilter;
+      });
+    }
     if (priorityFilter) {
       const priorities = priorityFilter.split(',');
       filtered = filtered.filter(t => priorities.includes(t.priority));
@@ -135,7 +146,7 @@ const TaskListPage = () => {
       return (statusOrder[a.status] ?? 4) - (statusOrder[b.status] ?? 4);
     });
     return filtered;
-  }, [allTasks, allProjects, activeDivision, isAdmin, user, memberFilter, priorityFilter, projectFilter, activeTab]);
+  }, [allTasks, allProjects, activeDivision, isAdmin, user, memberFilter, priorityFilter, projectFilter, activeTab, allTaskAssignees]);
 
 
   const handleStatusChange = (taskId: string, newStatus: TaskStatus) => {
@@ -158,7 +169,12 @@ const TaskListPage = () => {
       const project = allProjects.find(p => p.id === t.project_id);
       return project?.division === activeDivision;
     });
-    if (!isAdmin && user) base = base.filter(t => t.assignee_id === user.id);
+    if (!isAdmin && user) {
+      base = base.filter(t => {
+        const taIds = allTaskAssignees.filter(ta => ta.task_id === t.id).map(ta => ta.assignee_id);
+        return taIds.includes(user.id) || t.assignee_id === user.id;
+      });
+    }
     if (projectFilter) base = base.filter(t => t.project_id === projectFilter);
     return {
       all: base.filter(t => t.status !== 'done' && !(t as any).archived).length,
@@ -225,7 +241,11 @@ const TaskListPage = () => {
             <span>Project · Company</span><span>Task</span><span>Description</span><span>Priority</span><span>Due Date</span><span>Status</span><span>Assignee</span>
           </div>
           {filteredTasks.map((task, i) => {
-            const assignee = allMembers.find(u => u.id === task.assignee_id);
+            const taskAssigneeIds = allTaskAssignees.filter(ta => ta.task_id === task.id).map(ta => ta.assignee_id);
+            const assignees = taskAssigneeIds.length > 0
+              ? taskAssigneeIds.map(id => allMembers.find(u => u.id === id)).filter(Boolean)
+              : (task.assignee_id ? [allMembers.find(u => u.id === task.assignee_id)].filter(Boolean) : []);
+            const assigneeLabel = assignees.length > 0 ? assignees.map((a: any) => a.name.split(' ')[0]).join(', ') : 'Unassigned';
             const { projectName, companyName } = getProjectCompany(task.project_id);
             return (
               <motion.div key={task.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: i * 0.03 }}
@@ -240,7 +260,16 @@ const TaskListPage = () => {
                   <span className={cn('text-xs capitalize', priorityLabel[task.priority])}>{task.priority}</span>
                   <span className="text-xs text-muted-foreground">{formatDate(task.due_date)}</span>
                   <InlineStatusDropdown value={task.status as TaskStatus} onChange={(s) => handleStatusChange(task.id, s)} />
-                  <span className="text-xs text-muted-foreground truncate">{assignee?.name.split(' ')[0]}</span>
+                  <div className="flex items-center gap-1">
+                    <div className="flex -space-x-1">
+                      {assignees.slice(0, 2).map((a: any) => (
+                        <div key={a.id} className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-[7px] font-bold text-primary border border-card">
+                          {a.name.split(' ').map((n: string) => n[0]).join('')}
+                        </div>
+                      ))}
+                    </div>
+                    {assignees.length > 2 && <span className="text-[9px] text-muted-foreground">+{assignees.length - 2}</span>}
+                  </div>
                 </div>
                 <div className="lg:hidden p-3 border-b border-border/50 hover:bg-secondary/30">
                   <div className="flex items-center justify-between mb-1">
@@ -249,7 +278,7 @@ const TaskListPage = () => {
                   </div>
                   <p className="text-xs text-muted-foreground mb-2 line-clamp-1">{task.description}</p>
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] text-muted-foreground">{assignee?.name.split(' ')[0]} · {formatDate(task.due_date)}</span>
+                    <span className="text-[10px] text-muted-foreground">{assigneeLabel} · {formatDate(task.due_date)}</span>
                     <InlineStatusDropdown value={task.status as TaskStatus} onChange={(s) => handleStatusChange(task.id, s)} />
                   </div>
                 </div>
@@ -261,7 +290,10 @@ const TaskListPage = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredTasks.map((task, i) => {
-            const assignee = allMembers.find(u => u.id === task.assignee_id);
+            const taskAssigneeIds = allTaskAssignees.filter(ta => ta.task_id === task.id).map(ta => ta.assignee_id);
+            const assignees = taskAssigneeIds.length > 0
+              ? taskAssigneeIds.map(id => allMembers.find(u => u.id === id)).filter(Boolean)
+              : (task.assignee_id ? [allMembers.find(u => u.id === task.assignee_id)].filter(Boolean) : []);
             const { projectName, companyName } = getProjectCompany(task.project_id);
             return (
               <motion.div key={task.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
@@ -281,10 +313,14 @@ const TaskListPage = () => {
                 </div>
                 <div className="flex items-center justify-between mt-2">
                   <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                    <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-[8px] font-bold text-primary">
-                      {assignee?.name.split(' ').map(n => n[0]).join('') || '?'}
+                    <div className="flex -space-x-1.5">
+                      {assignees.slice(0, 3).map((a: any) => (
+                        <div key={a.id} className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-[8px] font-bold text-primary border border-card">
+                          {a.name.split(' ').map((n: string) => n[0]).join('')}
+                        </div>
+                      ))}
                     </div>
-                    <span>{assignee?.name.split(' ')[0] || 'Unassigned'}</span>
+                    <span>{assignees.length > 0 ? (assignees.length <= 2 ? assignees.map((a: any) => a.name.split(' ')[0]).join(', ') : `${assignees.length} assignees`) : 'Unassigned'}</span>
                   </div>
                   {(activeTab === 'done' || activeTab === 'archive') && isAdmin && (
                     <button

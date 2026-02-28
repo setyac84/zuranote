@@ -129,6 +129,42 @@ export type Database = {
           },
         ]
       }
+      task_assignees: {
+        Row: {
+          assignee_id: string
+          created_at: string
+          id: string
+          task_id: string
+        }
+        Insert: {
+          assignee_id: string
+          created_at?: string
+          id?: string
+          task_id: string
+        }
+        Update: {
+          assignee_id?: string
+          created_at?: string
+          id?: string
+          task_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_assignees_assignee_id_fkey"
+            columns: ["assignee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_assignees_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tasks: {
         Row: {
           archived: boolean

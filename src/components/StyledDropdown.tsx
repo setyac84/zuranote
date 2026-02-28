@@ -31,10 +31,10 @@ const StyledDropdown = <T extends string>({ value, onChange, options, placeholde
         <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform", open && "rotate-180")} />
       </button>
       {open && (
-        <div className="absolute top-full left-0 right-0 mt-1.5 bg-popover border border-border rounded-2xl shadow-xl z-[70] p-1.5 max-h-[220px] overflow-y-auto">
+        <div className="absolute top-full left-0 right-0 mt-1.5 bg-popover border border-border rounded-2xl shadow-xl z-[70] p-1.5 max-h-[220px] overflow-y-auto space-y-0.5">
           {options.map(opt => (
             <button key={opt.value} type="button" onClick={() => { onChange(opt.value); setOpen(false); }}
-              className={cn('w-full text-left px-3 py-2.5 text-sm rounded-xl transition-colors',
+              className={cn('w-full text-left px-3 py-2 text-sm rounded-xl transition-colors',
                 value === opt.value ? 'font-medium bg-accent text-accent-foreground' : 'text-foreground hover:bg-accent/60 hover:text-accent-foreground')}>
               {opt.label}
             </button>
