@@ -82,7 +82,7 @@ const CompanyPage = () => {
               <p className="text-xs text-muted-foreground">{company.description}</p>
             </div>
           </div>
-          {isSuperAdmin && (
+          {isAdmin && (
             <div className="flex items-center gap-1">
               <button onClick={() => handleEdit(company)} className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors">
                 <Pencil className="w-4 h-4" />
