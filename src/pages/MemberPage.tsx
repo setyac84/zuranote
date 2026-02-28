@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import StyledDropdown from '@/components/StyledDropdown';
+import AvatarUpload from '@/components/AvatarUpload';
 
 type UserRole = 'super_admin' | 'admin' | 'member';
 const roleOptions: UserRole[] = ['super_admin', 'admin', 'member'];
@@ -183,9 +184,7 @@ const MemberPage = () => {
             <motion.div key={member.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
               className="glass-card rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-sm font-semibold text-primary">
-                  {member.name?.split(' ').map((n: string) => n[0]).join('') || '?'}
-                </div>
+                <AvatarUpload userId={member.id} currentAvatar={member.avatar} name={member.name} size="sm" editable={false} />
                 <div>
                   <p className="text-sm font-medium text-foreground">{member.name}</p>
                   <p className="text-xs text-muted-foreground">{member.position || 'No position'}</p>
