@@ -111,12 +111,12 @@ const Dashboard = () => {
   });
 
   return (
-    <div className="max-w-7xl mx-auto px-2 lg:px-6">
+    <div className="max-w-8xl mx-auto px-2 lg:px-6">
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 lg:mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-xl sm:text-2xl font-bold text-foreground">Hello, {user.name.split(' ')[0]} 👋</h1>
-          <p className="text-muted-foreground mt-0.5 text-base my-[10px]">Today is <span className="font-bold bg-primary/10 text-primary px-2 py-0.5 rounded-md">{format(new Date(), 'd MMM yyyy')}</span></p>
+          <p className="text-muted-foreground mt-3 text-base">Today is <span className="font-bold bg-primary/10 text-primary px-2 py-0.5 rounded-md">{format(new Date(), 'd MMM yyyy')}</span></p>
         </div>
         {isAdmin &&
         <div className="flex items-center gap-2">
