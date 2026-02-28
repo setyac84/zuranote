@@ -71,7 +71,7 @@ const TaskCalendar: React.FC<TaskCalendarProps> = ({ tasks, members = [], onTask
   };
 
   return (
-    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="glass-card rounded-xl p-4 sm:p-5 mb-6">
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="glass-card rounded-xl p-4 sm:p-5">
       {/* Header controls */}
       <div className="flex flex-col gap-3 mb-4">
         <div className="flex items-center gap-2">
