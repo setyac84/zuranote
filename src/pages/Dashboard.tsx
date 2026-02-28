@@ -137,9 +137,7 @@ const Dashboard = () => {
                 className="glass-card rounded-xl overflow-hidden flex flex-col">
                 <div className="p-4 flex-1">
                   <div className="flex items-center justify-between mb-3">
-                    <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center', stat.bgColor)}>
-                      <stat.icon className={cn('w-4 h-4', stat.color)} />
-                    </div>
+                    <stat.icon className={cn('w-5 h-5', stat.color)} />
                     <p className="text-3xl font-bold text-foreground">{stat.value}</p>
                   </div>
                   <p className="text-xs text-muted-foreground font-medium">{stat.label}</p>
