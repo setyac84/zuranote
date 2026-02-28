@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useMembers, useUpdateProfile, useUpdateUserRole, useCreateMember, useDeleteMember, useResetMemberPassword } from '@/hooks/useSupabaseData';
+import { useMembers, useCompanies, useUpdateProfile, useUpdateUserRole, useCreateMember, useDeleteMember, useResetMemberPassword } from '@/hooks/useSupabaseData';
 import { motion } from 'framer-motion';
 import { Pencil, Trash2, Save, UserPlus, KeyRound, Eye, EyeOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -14,6 +14,8 @@ const roleOptions: UserRole[] = ['super_admin', 'admin', 'member'];
 const MemberPage = () => {
   const { user, activeDivision, isAdmin, isSuperAdmin } = useAuth();
   const { data: allMembers = [] } = useMembers();
+  const { data: companies = [] } = useCompanies();
+  const isHolding = user?.company_id === null;
   const updateProfile = useUpdateProfile();
   const updateRole = useUpdateUserRole();
   const createMember = useCreateMember();
@@ -188,6 +190,17 @@ const MemberPage = () => {
                   <p className="text-sm font-medium text-foreground">{member.name}</p>
                   <p className="text-xs text-muted-foreground">{member.position || 'No position'}</p>
                   <p className="text-[11px] text-muted-foreground/70">{member.email}</p>
+                  {isHolding && isSuperAdmin && (() => {
+                    const memberCompany = companies.find((c: any) => c.id === member.company_id);
+                    const holdingCompany = memberCompany?.parent_id
+                      ? companies.find((c: any) => c.id === memberCompany.parent_id)
+                      : memberCompany;
+                    return holdingCompany ? (
+                      <p className="text-[11px] mt-0.5 text-accent-foreground/70 bg-accent/40 px-1.5 py-0.5 rounded-md inline-block">
+                        🏢 {holdingCompany.name}{memberCompany?.parent_id ? ` → ${memberCompany.name}` : ''}
+                      </p>
+                    ) : null;
+                  })()}
                 </div>
               </div>
               <div className="flex items-center gap-2">
