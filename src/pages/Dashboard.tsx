@@ -278,18 +278,12 @@ const Dashboard = () => {
                   </button>
                 ))}
               </div>
-              <div className="relative">
-                <select 
-                  value={filterProject} 
-                  onChange={(e) => setFilterProject(e.target.value)}
-                  className="text-xs border border-border rounded-lg px-3 py-1.5 bg-card text-foreground appearance-none pr-7 cursor-pointer hover:bg-secondary/50 transition-colors"
-                >
-                  {projectFilterOptions.map(opt => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
-                <ChevronDown className="w-3 h-3 absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-              </div>
+              <StyledDropdown
+                value={filterProject}
+                onChange={(v) => setFilterProject(v)}
+                options={projectFilterOptions}
+                className="w-[180px]"
+              />
             </div>
 
             {/* Task heading */}
