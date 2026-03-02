@@ -379,13 +379,11 @@ const Dashboard = () => {
                   return (
                     <div key={task.id} onClick={() => setSelectedTask(task)} className="py-3 hover:bg-secondary/30 cursor-pointer transition-colors">
                       <p className="text-[10px] text-muted-foreground mb-1">{projectName} · {companyName}</p>
+                      {(task as any).code && (
+                        <span className="text-[10px] font-mono font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded inline-block mb-1">{(task as any).code}</span>
+                      )}
                       <div className="flex items-center justify-between mb-1">
-                        <div className="flex items-center gap-2">
-                          {(task as any).code && (
-                            <span className="text-[10px] font-mono font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded">{(task as any).code}</span>
-                          )}
-                          <span className="text-sm font-medium text-foreground">{task.title}</span>
-                        </div>
+                        <span className="text-sm font-medium text-foreground">{task.title}</span>
                         <span className={cn('text-[10px] font-semibold capitalize px-2 py-0.5 rounded-md', priorityBadge[task.priority])}>{task.priority}</span>
                       </div>
                       <p className="text-xs text-muted-foreground mb-2 line-clamp-1">{task.description}</p>
