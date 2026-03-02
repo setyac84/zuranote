@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { toast } from 'sonner';
 import StyledDropdown from '@/components/StyledDropdown';
 import AvatarUpload from '@/components/AvatarUpload';
+import MultiSelectDropdown from '@/components/MultiSelectDropdown';
 
 type UserRole = 'owner' | 'super_admin' | 'admin' | 'member';
 const roleOptions: UserRole[] = ['super_admin', 'admin', 'member'];
@@ -294,21 +295,12 @@ const MemberPage = () => {
               {myCompanies.length > 1 && (
                 <div className="col-span-2">
                   <label className="text-xs font-medium text-muted-foreground mb-1 block">Companies</label>
-                  <div className="space-y-1.5">
-                    {companyOptions.map(opt => (
-                      <label key={opt.value} className="flex items-center gap-2 text-sm cursor-pointer">
-                        <input type="checkbox" checked={(addForm.company_ids || []).includes(opt.value)}
-                          onChange={(e) => {
-                            setAddForm((f: any) => {
-                              const ids = f.company_ids || [];
-                              return { ...f, company_ids: e.target.checked ? [...ids, opt.value] : ids.filter((id: string) => id !== opt.value) };
-                            });
-                          }}
-                          className="rounded border-border" />
-                        {opt.label}
-                      </label>
-                    ))}
-                  </div>
+                  <MultiSelectDropdown
+                    options={companyOptions}
+                    selectedValues={addForm.company_ids || []}
+                    onChange={(ids) => setAddForm((f: any) => ({ ...f, company_ids: ids }))}
+                    placeholder="Semua company Anda"
+                  />
                   <p className="text-[10px] text-muted-foreground mt-1">Kosongkan untuk assign ke semua company Anda</p>
                 </div>
               )}
