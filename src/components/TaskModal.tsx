@@ -30,8 +30,8 @@ const creativeFieldLabels: Record<string, string> = {
   content_asset_link: 'Content Asset',
   moodboard_link: 'Reference',
   brand_guidelines: 'Visual Direction',
-  aspect_ratio: 'Deliverables',
-  result_link: 'Result Link',
+  aspect_ratio: 'Format',
+  result_link: 'Deliverables',
 };
 
 const ModalDropdown = <T extends string>({ value, onChange, options, placeholder }: {
@@ -492,18 +492,18 @@ const TaskModal = ({ task, division, isOpen, onClose, onDelete, readOnly, mode: 
                         )}
                       </div>
 
-                      {/* Deliverables */}
+                      {/* Format (aspect_ratio) */}
                       <div>
-                        <label className={labelCls}>Deliverables</label>
+                        <label className={labelCls}>Format</label>
                         {isEditable ? (
-                          <input
+                          <RichTextArea
                             value={form.aspect_ratio || ''}
-                            onChange={e => setForm((f: any) => ({ ...f, aspect_ratio: e.target.value }))}
+                            onChange={v => setForm((f: any) => ({ ...f, aspect_ratio: v }))}
                             className={inputCls}
-                            placeholder="e.g. 16:9, 1:1, 9:16..."
+                            placeholder="Paste format details or image..."
                           />
                         ) : (
-                          <p className="text-sm text-foreground">{form.aspect_ratio || '-'}</p>
+                          <RichTextDisplay value={form.aspect_ratio || '-'} />
                         )}
                       </div>
 
@@ -537,9 +537,9 @@ const TaskModal = ({ task, division, isOpen, onClose, onDelete, readOnly, mode: 
                         )}
                       </div>
 
-                      {/* Result Link - always editable inline */}
+                      {/* Deliverables - always editable inline */}
                       <div>
-                        <label className={labelCls}>Result Link</label>
+                        <label className={labelCls}>Deliverables</label>
                         <div className="space-y-1.5">
                           <input
                             value={form.result_link || ''}
