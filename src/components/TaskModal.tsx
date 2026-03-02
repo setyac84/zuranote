@@ -30,7 +30,7 @@ const creativeFieldLabels: Record<string, string> = {
   content_asset_link: 'Content Asset',
   moodboard_link: 'Reference',
   brand_guidelines: 'Visual Direction',
-  aspect_ratio: 'Aspect Ratio',
+  aspect_ratio: 'Deliverables',
   result_link: 'Result Link',
 };
 
@@ -492,9 +492,9 @@ const TaskModal = ({ task, division, isOpen, onClose, onDelete, readOnly, mode: 
                         )}
                       </div>
 
-                      {/* Aspect Ratio */}
+                      {/* Deliverables */}
                       <div>
-                        <label className={labelCls}>Aspect Ratio</label>
+                        <label className={labelCls}>Deliverables</label>
                         {isEditable ? (
                           <input
                             value={form.aspect_ratio || ''}
