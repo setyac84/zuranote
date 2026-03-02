@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   LayoutDashboard, FolderKanban, LogOut, Palette, Code2,
-  Building2, ListTodo, Users, Menu, X, PlusCircle, Moon, Sun, StickyNote,
+  Building2, ListTodo, Users, Menu, X, PlusCircle, Moon, Sun, StickyNote, Layers,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useDivisions } from '@/hooks/useSupabaseData';
@@ -50,6 +50,7 @@ const Sidebar = () => {
     ...(isAdmin ? [
       { to: '/company', icon: Building2, label: 'Company' },
       { to: '/members', icon: Users, label: 'Members' },
+      { to: '/divisions', icon: Layers, label: 'Divisions' },
     ] : []),
   ];
 
