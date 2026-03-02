@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useProjects, useMembers, useCompanies, useCreateTask, useUpdateTask, useTaskAssignees, useSetTaskAssignees } from '@/hooks/useSupabaseData';
+import { useProjects, useMembers, useCompanies, useCreateTask, useUpdateTask, useTaskAssignees, useSetTaskAssignees, useTasks } from '@/hooks/useSupabaseData';
 import { supabase } from '@/integrations/supabase/client';
 import { X, Calendar as CalendarIcon, Flag, User, Link, AlertTriangle, Trash2, ChevronDown, Save, Pencil, Image, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -237,9 +237,29 @@ const TaskModal = ({ task, division, isOpen, onClose, onDelete, readOnly, mode: 
   const { data: allMembers = [] } = useMembers();
   const { data: companies = [] } = useCompanies();
   const { data: allTaskAssignees = [] } = useTaskAssignees();
+  const { data: allTasks = [] } = useTasks();
   const createTask = useCreateTask();
   const updateTask = useUpdateTask();
   const setTaskAssignees = useSetTaskAssignees();
+
+  const monthLetters = ['J','F','M','A','M','J','J','A','S','O','N','D'];
+
+  const generateTaskCode = (projectId: string) => {
+    const project = allProjects.find(p => p.id === projectId);
+    if (!project) return '';
+    const projectInitial = project.name.charAt(0).toUpperCase();
+    const now = new Date();
+    const monthLetter = monthLetters[now.getMonth()];
+    const prefix = `${projectInitial}${monthLetter}`;
+    // Count existing tasks with same prefix this month
+    const currentMonth = format(now, 'yyyy-MM');
+    const existingCount = allTasks.filter(t => {
+      if (!t.code || t.project_id !== projectId) return false;
+      return t.code.startsWith(prefix + '-');
+    }).length;
+    const nextNum = String(existingCount + 1).padStart(3, '0');
+    return `${prefix}-${nextNum}`;
+  };
 
   const [mode, setMode] = useState<'view' | 'edit' | 'create'>(initialMode);
   const [form, setForm] = useState<any>({});
@@ -286,13 +306,16 @@ const TaskModal = ({ task, division, isOpen, onClose, onDelete, readOnly, mode: 
   const handleSave = async () => {
     if (!form.title?.trim()) return;
     if (isCreate) {
+      const taskProjectId = form.project_id || projectId || '';
+      const code = generateTaskCode(taskProjectId);
       const result = await createTask.mutateAsync({
-        title: form.title, description: form.description || '', project_id: form.project_id || projectId || '',
+        title: form.title, description: form.description || '', project_id: taskProjectId,
         assignee_id: selectedAssignees[0] || undefined, status: form.status, priority: form.priority,
         request_date: form.request_date, due_date: form.due_date || undefined,
         moodboard_link: form.moodboard_link, aspect_ratio: form.aspect_ratio, brand_guidelines: form.brand_guidelines,
         result_link: form.result_link, content_asset_link: form.content_asset_link,
         repo_link: form.repo_link, environment: form.environment, bug_severity: form.bug_severity,
+        code,
       });
       if (result?.id) {
         await setTaskAssignees.mutateAsync({ taskId: result.id, assigneeIds: selectedAssignees });
@@ -355,6 +378,11 @@ const TaskModal = ({ task, division, isOpen, onClose, onDelete, readOnly, mode: 
                 <div className="flex-1 min-w-0">
                   {!isEditable && (
                     <div className="flex items-center gap-2 mb-2">
+                      {form.code && (
+                        <span className="text-[10px] font-mono font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                          {form.code}
+                        </span>
+                      )}
                       <span className={cn('text-[10px] font-medium px-2 py-0.5 rounded-full', priorityColors[form.priority as TaskPriority])}>
                         {(form.priority as string)?.toUpperCase()}
                       </span>

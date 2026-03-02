@@ -98,6 +98,9 @@ const KanbanBoard = () => {
                         <div className={cn('w-2 h-2 rounded-full shrink-0', priorityDot[task.priority])} />
                         <span className="text-[10px] text-muted-foreground capitalize">{task.priority}</span>
                       </div>
+                      {(task as any).code && (
+                        <span className="text-[10px] font-mono font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded inline-block mb-1">{(task as any).code}</span>
+                      )}
                       <h4 className="text-sm font-medium text-foreground mb-1 line-clamp-2">{task.title}</h4>
                       {assignees.length > 0 && (
                         <div className="flex items-center gap-1 mt-2">
