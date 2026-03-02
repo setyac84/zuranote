@@ -16,13 +16,13 @@ const DigitalClock = () => {
   const minutes = format(time, 'mm');
   const seconds = format(time, 'ss');
   return (
-    <div className="flex items-center gap-1 font-mono">
-      <span className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">{hours}</span>
-      <span className="text-2xl sm:text-3xl font-bold text-primary animate-pulse">:</span>
-      <span className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">{minutes}</span>
-      <span className="text-2xl sm:text-3xl font-bold text-primary animate-pulse">:</span>
-      <span className="text-2xl sm:text-3xl font-bold text-primary/60 tracking-tight">{seconds}</span>
-    </div>
+    <span className="inline-flex items-baseline gap-0.5 font-mono ml-3">
+      <span className="text-sm sm:text-base font-bold text-foreground tracking-tight">{hours}</span>
+      <span className="text-sm sm:text-base font-bold text-foreground">:</span>
+      <span className="text-sm sm:text-base font-bold text-foreground tracking-tight">{minutes}</span>
+      <span className="text-sm sm:text-base font-bold text-foreground">:</span>
+      <span className="text-sm sm:text-base font-bold text-muted-foreground tracking-tight">{seconds}</span>
+    </span>
   );
 };
 import TaskCalendar from '@/components/TaskCalendar';
@@ -245,13 +245,10 @@ const Dashboard = () => {
           <AvatarUpload userId={user.id} currentAvatar={user.avatar} name={user.name} size="md" editable={false} />
           <div>
             <h1 className="text-xl sm:text-2xl font-bold text-foreground">Hello, {user.name.split(' ')[0]} 👋</h1>
-            <p className="text-muted-foreground mt-2 text-sm">Today is <span className="font-bold bg-primary/10 text-primary px-2 py-0.5 rounded-md">{format(new Date(), 'EEEE, d MMM yyyy')}</span></p>
+            <p className="text-muted-foreground mt-2 text-sm flex items-baseline flex-wrap">Today is <span className="font-bold bg-primary/10 text-primary px-2 py-0.5 rounded-md ml-1">{format(new Date(), 'EEEE, d MMM yyyy')}</span><DigitalClock /></p>
           </div>
         </div>
         <div className="flex items-center gap-3 sm:gap-4">
-          <div className="glass-card rounded-xl px-4 py-2 flex items-center">
-            <DigitalClock />
-          </div>
         {isAdmin &&
         <div className="flex items-center gap-2">
             <button onClick={() => setShowCreateTask(true)} className="flex items-center gap-1.5 px-3 sm:px-4 py-2 text-xs sm:text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors shadow-md">
