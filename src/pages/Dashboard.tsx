@@ -1,10 +1,10 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useProjects, useTasks, useMembers, useCompanies, useCreateProject, useCreateTask, useUpdateTask, useUpdateProject, useDeleteTask, useUpdateProfile, useUpdateUserRole, useTaskAssignees, useNotes } from '@/hooks/useSupabaseData';
+import { useProjects, useTasks, useMembers, useCompanies, useCreateProject, useCreateTask, useUpdateTask, useUpdateProject, useDeleteTask, useUpdateProfile, useUpdateUserRole, useTaskAssignees, useNotes, useSetTaskAssignees } from '@/hooks/useSupabaseData';
 import { formatDate, formatDaysLeft, daysLeftColor } from '@/lib/formatDate';
 import { format, addDays, parseISO, startOfMonth, endOfMonth } from 'date-fns';
 import { motion } from 'framer-motion';
-import { FolderKanban, CheckCircle2, Clock, AlertTriangle, Users, Plus, Pencil, Trash2, Save, ChevronDown, StickyNote, Filter } from 'lucide-react';
+import { FolderKanban, CheckCircle2, Clock, AlertTriangle, Users, Plus, Pencil, Trash2, Save, ChevronDown, StickyNote, Filter, Copy } from 'lucide-react';
 import TaskCalendar from '@/components/TaskCalendar';
 import AvatarUpload from '@/components/AvatarUpload';
 import ProjectCard from '@/components/ProjectCard';
@@ -62,6 +62,8 @@ const Dashboard = () => {
   const { data: allTaskAssignees = [] } = useTaskAssignees();
   const updateTaskMutation = useUpdateTask();
   const deleteTaskMutation = useDeleteTask();
+  const createTaskMutation = useCreateTask();
+  const setTaskAssigneesMutation = useSetTaskAssignees();
   const { data: notes = [] } = useNotes();
 
   const [selectedTask, setSelectedTask] = useState<any>(null);
@@ -100,6 +102,22 @@ const Dashboard = () => {
 
   const handleStatusChange = (taskId: string, newStatus: TaskStatus) => {
     updateTaskMutation.mutate({ id: taskId, status: newStatus });
+  };
+
+  const handleDuplicateTask = (task: any, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const { id, created_at, updated_at, ...rest } = task;
+    createTaskMutation.mutate(
+      { ...rest, status: 'todo' as any },
+      {
+        onSuccess: (newTask: any) => {
+          const taIds = allTaskAssignees.filter(ta => ta.task_id === task.id).map(ta => ta.assignee_id);
+          if (taIds.length > 0 && newTask?.id) {
+            setTaskAssigneesMutation.mutate({ taskId: newTask.id, assigneeIds: taIds });
+          }
+        },
+      }
+    );
   };
 
   const getProjectCompany = (projectId: string) => {
@@ -378,7 +396,16 @@ const Dashboard = () => {
                   const { projectName, companyName } = getProjectCompany(task.project_id);
                   return (
                     <div key={task.id} onClick={() => setSelectedTask(task)} className="py-3 hover:bg-secondary/30 cursor-pointer transition-colors">
-                      <p className="text-[10px] text-muted-foreground mb-1">{projectName} · {companyName}</p>
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="text-[10px] text-muted-foreground">{projectName} · {companyName}</p>
+                        <button
+                          onClick={(e) => handleDuplicateTask(task, e)}
+                          className="p-1 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                          title="Duplicate task"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                       {(task as any).code && (
                         <span className="text-[10px] font-mono font-bold text-primary bg-primary/10 px-1.5 py-0.5 rounded inline-block mb-1">{(task as any).code}</span>
                       )}
