@@ -13,6 +13,41 @@ export function useDivisions() {
   });
 }
 
+export function useCreateDivision() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: { name: string }) => {
+      const { data, error } = await supabase.from('divisions').insert(input).select().single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['divisions'] }),
+  });
+}
+
+export function useUpdateDivision() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, name }: { id: string; name: string }) => {
+      const { data, error } = await supabase.from('divisions').update({ name }).eq('id', id).select().single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['divisions'] }),
+  });
+}
+
+export function useDeleteDivision() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('divisions').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['divisions'] }),
+  });
+}
+
 // ─── User Companies ───
 export function useUserCompanies() {
   return useQuery({
