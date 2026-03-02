@@ -210,6 +210,7 @@ export type Database = {
           assignee_id: string | null
           brand_guidelines: string | null
           bug_severity: string | null
+          code: string | null
           content_asset_link: string | null
           created_at: string
           deliverables: string | null
@@ -233,6 +234,7 @@ export type Database = {
           assignee_id?: string | null
           brand_guidelines?: string | null
           bug_severity?: string | null
+          code?: string | null
           content_asset_link?: string | null
           created_at?: string
           deliverables?: string | null
@@ -256,6 +258,7 @@ export type Database = {
           assignee_id?: string | null
           brand_guidelines?: string | null
           bug_severity?: string | null
+          code?: string | null
           content_asset_link?: string | null
           created_at?: string
           deliverables?: string | null
