@@ -127,12 +127,12 @@ const RichTextArea = ({ value, onChange, placeholder, className, id }: {
   const [uploading, setUploading] = useState(false);
 
   // Split value into text parts and image parts
-  const parts = value.split(/(\[image: [^\]]+\])/g);
-  const images = parts.filter(p => /^\[image: [^\]]+\]$/.test(p)).map(p => {
+  const imageRegex = /\[image: [^\]]+\]/g;
+  const images = (value.match(imageRegex) || []).map(p => {
     const m = p.match(/^\[image: ([^\]]+)\]$/);
     return m ? m[1] : '';
   });
-  const textOnly = parts.filter(p => !/^\[image: [^\]]+\]$/.test(p)).join('').trim();
+  const textOnly = value.replace(imageRegex, '').replace(/\n{3,}/g, '\n\n').replace(/^\n+/, '');
 
   const handlePaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
     const items = e.clipboardData?.items;
@@ -156,7 +156,7 @@ const RichTextArea = ({ value, onChange, placeholder, className, id }: {
           const { data: urlData } = supabase.storage.from('task-images').getPublicUrl(filePath);
           const imageUrl = urlData.publicUrl;
 
-          onChange(value + `\n[image: ${imageUrl}]\n`);
+          onChange(value + `\n[image: ${imageUrl}]`);
         } catch (err) {
           console.error('Image upload failed:', err);
         } finally {
@@ -169,7 +169,7 @@ const RichTextArea = ({ value, onChange, placeholder, className, id }: {
   const handleTextChange = (newText: string) => {
     // Rebuild value: new text + all existing images
     const imageParts = images.map(url => `[image: ${url}]`).join('\n');
-    onChange(newText + (imageParts ? '\n' + imageParts + '\n' : ''));
+    onChange(newText + (imageParts ? '\n' + imageParts : ''));
   };
 
   const handleRemoveImage = (url: string) => {
