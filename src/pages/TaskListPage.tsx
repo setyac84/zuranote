@@ -402,6 +402,8 @@ const AssigneeFilterDropdown = ({ members, value, onChange }: { members: { id: s
                 <div className="flex items-center justify-between mb-2">
                   <p className="text-[10px] text-muted-foreground">{projectName} · {companyName}</p>
                   <div className="flex items-center gap-1.5">
+                    <div className={cn('w-2 h-2 rounded-full shrink-0', priorityDot[task.priority])} />
+                    <span className={cn('text-[10px] font-medium capitalize', priorityLabel[task.priority])}>{task.priority}</span>
                     <button
                       onClick={(e) => handleDuplicateTask(task, e)}
                       className="p-1 rounded-md text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
@@ -409,8 +411,6 @@ const AssigneeFilterDropdown = ({ members, value, onChange }: { members: { id: s
                     >
                       <Copy className="w-3.5 h-3.5" />
                     </button>
-                    <div className={cn('w-2 h-2 rounded-full shrink-0', priorityDot[task.priority])} />
-                    <span className={cn('text-[10px] font-medium capitalize', priorityLabel[task.priority])}>{task.priority}</span>
                   </div>
                 </div>
                 {(task as any).code && (
