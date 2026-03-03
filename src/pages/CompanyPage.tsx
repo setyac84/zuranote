@@ -95,7 +95,14 @@ const CompanyPage = () => {
   const handleAddMember = async () => {
     if (!addMemberDialog || !selectedMemberId) return;
     try {
-      await addUserToCompany.mutateAsync({ userId: selectedMemberId, companyId: addMemberDialog });
+      // Preserve the user's highest existing role when adding to a new company
+      const existingRoles = userCompanies.filter(uc => uc.user_id === selectedMemberId).map(uc => uc.role);
+      const roleHierarchy: Array<'owner' | 'super_admin' | 'admin' | 'member'> = ['owner', 'super_admin', 'admin', 'member'];
+      const highestRole = roleHierarchy.find(r => existingRoles.includes(r)) || 'member';
+      // Don't assign owner to new companies — cap at admin for non-owner
+      const assignRole = highestRole === 'owner' ? 'admin' : highestRole;
+      
+      await addUserToCompany.mutateAsync({ userId: selectedMemberId, companyId: addMemberDialog, role: assignRole });
       toast.success('Member added to company successfully');
       setAddMemberDialog(null);
       setSelectedMemberId('');
