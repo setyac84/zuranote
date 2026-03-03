@@ -119,12 +119,20 @@ const MultiAssigneeSelect = ({ selected, onChange, options }: {
   );
 };
 
-// Rich textarea with image paste support
+// Rich textarea with image paste support - shows image previews inline
 const RichTextArea = ({ value, onChange, placeholder, className, id }: {
   value: string; onChange: (v: string) => void; placeholder?: string; className?: string; id?: string;
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [uploading, setUploading] = useState(false);
+
+  // Split value into text parts and image parts
+  const parts = value.split(/(\[image: [^\]]+\])/g);
+  const images = parts.filter(p => /^\[image: [^\]]+\]$/.test(p)).map(p => {
+    const m = p.match(/^\[image: ([^\]]+)\]$/);
+    return m ? m[1] : '';
+  });
+  const textOnly = parts.filter(p => !/^\[image: [^\]]+\]$/.test(p)).join('').trim();
 
   const handlePaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
     const items = e.clipboardData?.items;
@@ -148,18 +156,7 @@ const RichTextArea = ({ value, onChange, placeholder, className, id }: {
           const { data: urlData } = supabase.storage.from('task-images').getPublicUrl(filePath);
           const imageUrl = urlData.publicUrl;
 
-          // Insert image URL at cursor position
-          const textarea = textareaRef.current;
-          if (textarea) {
-            const start = textarea.selectionStart;
-            const end = textarea.selectionEnd;
-            const before = value.slice(0, start);
-            const after = value.slice(end);
-            const imageText = `${before ? '\n' : ''}[image: ${imageUrl}]\n`;
-            onChange(before + imageText + after);
-          } else {
-            onChange(value + `\n[image: ${imageUrl}]\n`);
-          }
+          onChange(value + `\n[image: ${imageUrl}]\n`);
         } catch (err) {
           console.error('Image upload failed:', err);
         } finally {
@@ -169,6 +166,17 @@ const RichTextArea = ({ value, onChange, placeholder, className, id }: {
     }
   };
 
+  const handleTextChange = (newText: string) => {
+    // Rebuild value: new text + all existing images
+    const imageParts = images.map(url => `[image: ${url}]`).join('\n');
+    onChange(newText + (imageParts ? '\n' + imageParts + '\n' : ''));
+  };
+
+  const handleRemoveImage = (url: string) => {
+    const updated = value.replace(`[image: ${url}]`, '').replace(/\n{2,}/g, '\n').trim();
+    onChange(updated);
+  };
+
   // Auto-resize textarea
   useEffect(() => {
     const el = textareaRef.current;
@@ -176,22 +184,40 @@ const RichTextArea = ({ value, onChange, placeholder, className, id }: {
       el.style.height = 'auto';
       el.style.height = Math.max(60, el.scrollHeight) + 'px';
     }
-  }, [value]);
+  }, [textOnly]);
 
   return (
-    <div className="relative">
-      <textarea
-        id={id}
-        ref={textareaRef}
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        onPaste={handlePaste}
-        placeholder={placeholder}
-        className={cn(className, 'min-h-[60px] resize-none')}
-      />
-      {uploading && (
-        <div className="absolute right-2 top-2 flex items-center gap-1 text-[10px] text-muted-foreground bg-secondary/80 px-2 py-0.5 rounded-full">
-          <Image className="w-3 h-3 animate-pulse" /> Uploading...
+    <div className="space-y-2">
+      <div className="relative">
+        <textarea
+          id={id}
+          ref={textareaRef}
+          value={textOnly}
+          onChange={e => handleTextChange(e.target.value)}
+          onPaste={handlePaste}
+          placeholder={placeholder}
+          className={cn(className, 'min-h-[60px] resize-none')}
+        />
+        {uploading && (
+          <div className="absolute right-2 top-2 flex items-center gap-1 text-[10px] text-muted-foreground bg-secondary/80 px-2 py-0.5 rounded-full">
+            <Image className="w-3 h-3 animate-pulse" /> Uploading...
+          </div>
+        )}
+      </div>
+      {images.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {images.map((url, i) => (
+            <div key={i} className="relative group w-24 h-24 rounded-lg border border-border overflow-hidden bg-muted">
+              <img src={url} alt="Pasted" className="w-full h-full object-cover" />
+              <button
+                type="button"
+                onClick={() => handleRemoveImage(url)}
+                className="absolute top-0.5 right-0.5 bg-destructive text-destructive-foreground rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          ))}
         </div>
       )}
     </div>
