@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCompanies, useCreateProject, useUpdateProject, useDeleteProject } from '@/hooks/useSupabaseData';
 import { X, Pencil, Trash2, Save, Calendar as CalendarIcon } from 'lucide-react';
@@ -68,21 +69,27 @@ const ProjectModal = ({ project, division, isOpen, onClose, mode: initialMode = 
   }, [project, initialMode, division, isOpen]);
 
   const handleSave = async () => {
-    if (!form.name.trim()) return;
-    if (mode === 'create') {
-      await createProject.mutateAsync({
-        name: form.name, description: form.description, company_id: form.company_id,
-        division_id: form.division_id, status: form.status, priority: form.priority,
-        start_date: form.start_date || undefined, end_date: form.end_date || undefined,
-      });
-    } else if (project) {
-      await updateProject.mutateAsync({
-        id: project.id, name: form.name, description: form.description,
-        company_id: form.company_id, status: form.status, priority: form.priority,
-        start_date: form.start_date || null, end_date: form.end_date || null,
-      });
+    if (!form.name.trim() || !form.company_id) return;
+    try {
+      if (mode === 'create') {
+        await createProject.mutateAsync({
+          name: form.name, description: form.description, company_id: form.company_id,
+          division_id: form.division_id, status: form.status, priority: form.priority,
+          start_date: form.start_date || undefined, end_date: form.end_date || undefined,
+        });
+        toast.success('Project created successfully');
+      } else if (project) {
+        await updateProject.mutateAsync({
+          id: project.id, name: form.name, description: form.description,
+          company_id: form.company_id, status: form.status, priority: form.priority,
+          start_date: form.start_date || null, end_date: form.end_date || null,
+        });
+        toast.success('Project updated successfully');
+      }
+      onClose();
+    } catch (err: any) {
+      toast.error(err?.message || 'Failed to save project');
     }
-    onClose();
   };
 
   const handleDelete = async () => {
@@ -212,7 +219,7 @@ const ProjectModal = ({ project, division, isOpen, onClose, mode: initialMode = 
                   )}
                   {isEditable && (
                     <>
-                      <button onClick={handleSave} disabled={!form.name.trim() || createProject.isPending || updateProject.isPending}
+                      <button onClick={handleSave} disabled={!form.name.trim() || !form.company_id || createProject.isPending || updateProject.isPending}
                         className="flex items-center gap-1.5 px-4 py-2 text-sm rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50">
                         <Save className="w-3.5 h-3.5" /> Save
                       </button>
