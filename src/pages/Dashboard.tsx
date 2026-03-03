@@ -1,4 +1,4 @@
-import React, { useState as useStateReact, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProjects, useTasks, useMembers, useCompanies, useCreateProject, useCreateTask, useUpdateTask, useUpdateProject, useDeleteTask, useUpdateProfile, useUpdateUserRole, useTaskAssignees, useNotes, useSetTaskAssignees } from '@/hooks/useSupabaseData';
 import { formatDate, formatDaysLeft, daysLeftColor } from '@/lib/formatDate';
@@ -6,24 +6,47 @@ import { format, addDays, parseISO, startOfMonth, endOfMonth } from 'date-fns';
 import { motion } from 'framer-motion';
 import { FolderKanban, CheckCircle2, Clock, AlertTriangle, Users, Plus, Pencil, Trash2, Save, ChevronDown, StickyNote, Filter, Copy } from 'lucide-react';
 
-const DigitalClock = () => {
-  const [time, setTime] = useStateReact(new Date());
-  useEffect(() => {
-    const timer = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-  const hours = format(time, 'HH');
-  const minutes = format(time, 'mm');
-  const seconds = format(time, 'ss');
-  return (
-    <span className="inline-flex items-baseline gap-0.5 tabular-nums ml-3">
-      <span className="text-sm sm:text-base font-bold text-foreground tracking-tight">{hours}</span>
-      <span className="text-sm sm:text-base font-bold text-foreground">:</span>
-      <span className="text-sm sm:text-base font-bold text-foreground tracking-tight">{minutes}</span>
-      <span className="text-sm sm:text-base font-bold text-foreground">:</span>
-      <span className="text-sm sm:text-base font-bold text-muted-foreground tracking-tight">{seconds}</span>
-    </span>
-  );
+// Gen-Z daily motivational quotes (rotates by day of year)
+const genZQuotes = [
+  "You're literally the main character today. Act like it. 💅",
+  "No cap, you're about to crush it today. Let's go! 🔥",
+  "Slay the day bestie, no thoughts just vibes. ✨",
+  "POV: you're being productive and absolutely iconic. 🚀",
+  "It's giving boss energy. Go get that bread! 🍞",
+  "Main character energy activated. Side quests optional. 🎮",
+  "You woke up and chose greatness. Periodt. 💯",
+  "Touch grass later, touch goals first. 🎯",
+  "Your to-do list doesn't stand a chance. Fr fr. 😤",
+  "Bestie you got this, no stress just progress. 🌟",
+  "Living rent-free in productivity mode today. 🏠",
+  "Ate that last task and left no crumbs. Keep going! 🍽️",
+  "We don't gatekeep success here. Go off! 🔓",
+  "Plot twist: you're actually built for this. 🏗️",
+  "Lowkey about to have the most productive day ever. ⚡",
+  "It's not a phase, it's your grind era. 💪",
+  "Sis/bro, today is YOUR day. That's the tea. ☕",
+  "Delulu is the solulu — manifest that W! 🧠",
+  "Zero cringe, max output. Let's get it. 🎬",
+  "You understood the assignment. Now execute. 📝",
+  "Not you being this productive. We stan! 👑",
+  "Bussin' through tasks like there's no tomorrow. 💨",
+  "The vibes are immaculate and so is your workflow. 🌊",
+  "Serving productivity realness all day long. 💎",
+  "This is your Roman Empire: getting stuff done. ⚔️",
+  "Era check: it's your productive era. Own it. 🦋",
+  "Be so good they can't ignore you. Bet. 🎰",
+  "Rent is due and so are these tasks. Let's work! 🏢",
+  "Grind now, flex later. Simple math. 📐",
+  "You're not just doing the bare minimum. That's growth. 🌱",
+  "Big brain energy only today. Small talk blocked. 🧩",
+];
+
+const getDailyQuote = () => {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const diff = now.getTime() - start.getTime();
+  const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
+  return genZQuotes[dayOfYear % genZQuotes.length];
 };
 import TaskCalendar from '@/components/TaskCalendar';
 import AvatarUpload from '@/components/AvatarUpload';
@@ -245,7 +268,7 @@ const Dashboard = () => {
           <AvatarUpload userId={user.id} currentAvatar={user.avatar} name={user.name} size="md" editable={false} />
           <div>
             <h1 className="text-xl sm:text-2xl font-bold text-foreground">Hello, {user.name.split(' ')[0]} 👋</h1>
-            <p className="text-muted-foreground mt-2 text-sm flex items-baseline flex-wrap">Today is <span className="font-bold bg-primary/10 text-primary px-2 py-0.5 rounded-md ml-1">{format(new Date(), 'EEEE, d MMM yyyy')}</span><DigitalClock /></p>
+            <p className="text-muted-foreground mt-1 text-xs sm:text-sm">{getDailyQuote()}</p>
           </div>
         </div>
         <div className="flex items-center gap-3 sm:gap-4">
