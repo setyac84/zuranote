@@ -1,23 +1,33 @@
-import { NavLink, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import {
-  LayoutDashboard, FolderKanban, LogOut, Palette, Code2,
-  Building2, ListTodo, Users, Menu, X, PlusCircle, Moon, Sun, StickyNote, Layers,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { useDivisions } from '@/hooks/useSupabaseData';
-import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
-import { useTheme } from 'next-themes';
 import logoImg from '@/assets/logo.png';
-import { Switch } from '@/components/ui/switch';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import AvatarUpload from '@/components/AvatarUpload';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useUpdateProfile } from '@/hooks/useSupabaseData';
+import { Switch } from '@/components/ui/switch';
+import { useAuth } from '@/contexts/AuthContext';
+import { useDivisions, useUpdateProfile } from '@/hooks/useSupabaseData';
+import { cn } from '@/lib/utils';
+import {
+  Building2,
+  Code2,
+  FolderKanban,
+  Layers,
+  LayoutDashboard,
+  ListTodo,
+  LogOut,
+  Menu,
+  Moon,
+  Palette,
+  StickyNote,
+  Sun,
+  Users,
+  X
+} from 'lucide-react';
+import { useTheme } from 'next-themes';
+import { useEffect, useState } from 'react';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import AvatarUpload from '@/components/AvatarUpload';
 
 const Sidebar = () => {
   const { user, logout, activeDivision, setActiveDivision, isSuperAdmin, isAdmin, refreshProfile } = useAuth();
@@ -87,8 +97,8 @@ const Sidebar = () => {
     <>
       <div className="h-14 flex items-center justify-between gap-2.5 px-3 border-b border-sidebar-border">
         <div className="flex items-center gap-2.5">
-          <img src={logoImg} alt="Fix Note" className="w-7 h-7 rounded-lg shrink-0" />
-          <span className="font-bold text-foreground text-sm">Fix Note</span>
+          <img src={logoImg} alt="Zura Note" className="w-7 h-7 rounded-lg shrink-0" />
+          <span className="font-bold text-foreground text-sm">Zura Note</span>
         </div>
         <button onClick={() => setMobileOpen(false)} className="lg:hidden p-1 text-muted-foreground hover:text-foreground">
           <X className="w-5 h-5" />
@@ -161,8 +171,8 @@ const Sidebar = () => {
           <Menu className="w-5 h-5" />
         </button>
         <div className="flex items-center gap-2 ml-3">
-          <img src={logoImg} alt="Fix Note" className="w-6 h-6 rounded-md" />
-          <span className="font-bold text-foreground text-sm">Fix Note</span>
+          <img src={logoImg} alt="Zura Note" className="w-6 h-6 rounded-md" />
+          <span className="font-bold text-foreground text-sm">Zura Note</span>
         </div>
       </div>
 

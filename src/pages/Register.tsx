@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ArrowRight, Loader2, Eye, EyeOff, Building2 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import logoImg from '@/assets/logo.png';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { motion } from 'framer-motion';
+import { ArrowRight, Building2, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Register = () => {
   const { user, loading: authLoading } = useAuth();
@@ -67,8 +67,8 @@ const Register = () => {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="w-full max-w-md">
         <div className="flex items-center gap-3 mb-8 justify-center">
-          <img src={logoImg} alt="Fix Note" className="w-10 h-10 rounded-xl" />
-          <h1 className="text-2xl font-bold text-foreground">Fix Note</h1>
+          <img src={logoImg} alt="Zura Note" className="w-10 h-10 rounded-xl" />
+          <h1 className="text-2xl font-bold text-foreground">Zura Note</h1>
         </div>
 
         <div className="glass-card rounded-2xl p-8">
