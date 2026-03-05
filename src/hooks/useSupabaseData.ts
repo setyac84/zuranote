@@ -334,10 +334,23 @@ export function useCreateMember() {
       position?: string; division_id?: string; company_ids?: string[]; role?: string;
     }) => {
       const { data: { session } } = await supabase.auth.getSession();
-      const headers = session ? { Authorization: `Bearer ${session.access_token}` } : {};
-      const { data, error } = await supabase.functions.invoke('create-member', { body: input, headers });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      if (!session) throw new Error('Not authenticated');
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-member`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify(input),
+        }
+      );
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to create member');
       return data;
     },
     onSuccess: () => {
@@ -352,10 +365,23 @@ export function useDeleteMember() {
   return useMutation({
     mutationFn: async (userId: string) => {
       const { data: { session } } = await supabase.auth.getSession();
-      const headers = session ? { Authorization: `Bearer ${session.access_token}` } : {};
-      const { data, error } = await supabase.functions.invoke('delete-member', { body: { user_id: userId }, headers });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      if (!session) throw new Error('Not authenticated');
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-member`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({ user_id: userId }),
+        }
+      );
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to delete member');
       return data;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['members'] }),
@@ -366,13 +392,23 @@ export function useResetMemberPassword() {
   return useMutation({
     mutationFn: async ({ userId, newPassword }: { userId: string; newPassword: string }) => {
       const { data: { session } } = await supabase.auth.getSession();
-      const headers = session ? { Authorization: `Bearer ${session.access_token}` } : {};
-      const { data, error } = await supabase.functions.invoke('reset-member-password', {
-        body: { user_id: userId, new_password: newPassword },
-        headers,
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
+      if (!session) throw new Error('Not authenticated');
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/reset-member-password`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({ user_id: userId, new_password: newPassword }),
+        }
+      );
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to reset password');
       return data;
     },
   });
